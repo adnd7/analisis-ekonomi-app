@@ -110,6 +110,9 @@ WARNA_SEKTOR_GLOBAL = {
 def get_warna_sektor_map(df_column):
     return {sektor: WARNA_SEKTOR_GLOBAL.get(str(sektor).lower(), "#6B7280") for sektor in df_column.unique()}
 
+# ------------------------------------------------------------------------------
+# PERBAIKAN GRAFIK: Menambahkan Data Label 1 Angka di Belakang Koma
+# ------------------------------------------------------------------------------
 def buat_bar_chart_makro(df_aktif, tipe_chart):
     if df_aktif is None or df_aktif.empty:
         st.warning("Data makro untuk grafik batang kosong.")
@@ -118,13 +121,21 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     if tipe_chart == "Pertumbuhan Ekonomi":
         if "lpe_ctc" not in df_aktif.columns: return st.warning("Kolom lpe_ctc tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["lpe_ctc"]).sort_values(by="lpe_ctc", ascending=True)
-        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
+        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', 
+                     labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, 
+                     color="lpe_ctc", color_continuous_scale="Viridis")
+        # Format label angka desimal: %{x:.1f} artinya mengambil sumbu X dipotong 1 angka desimal
+        fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
     else:
         if "kontribusi" not in df_aktif.columns: return st.warning("Kolom kontribusi tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["kontribusi"]).sort_values(by="kontribusi", ascending=True)
-        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, color="kontribusi", color_continuous_scale="Cividis")
+        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', 
+                     labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, 
+                     color="kontribusi", color_continuous_scale="Cividis")
+        # Format label angka desimal: %{x:.1f} artinya mengambil sumbu X dipotong 1 angka desimal
+        fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
         
-    fig.update_layout(height=600, margin={"r":10,"t":10,"l":10,"b":10})
+    fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10}) # Menaikkan height ke 750 agar label teks tidak tumpang tindih
     st.plotly_chart(fig, use_container_width=True)
 
 def buat_peta_klasifikasi(df_aktif):
@@ -143,29 +154,21 @@ def buat_peta_klasifikasi(df_aktif):
         # SINKRONISASI PETA: Membuat salinan data khusus untuk peta agar data asli Excel tidak rusak
         df_peta = df_aktif.copy()
         
-        # Mengubah nama "DI Yogyakarta" menjadi "DAERAH ISTIMEWA YOGYAKARTA" agar dibaca oleh GeoJSON
+        # Mengubah nama "DI Yogyakarta" menjadi "Daerah Istimewa Yogyakarta" agar dibaca oleh GeoJSON
         df_peta['provinsi'] = df_peta['provinsi'].replace({
             "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
             "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta"
         })
             
         fig = px.choropleth_mapbox(
-            df_peta, # Gunakan dataframe tiruan yang sudah disinkronkan namanya
-            geojson=geojson_indonesia, 
-            locations="provinsi", 
-            featureidkey="properties.PROVINSI", # Menghubungkan ke nama provinsi di GeoJSON
-            color="klasifikasi",                  
+            df_peta, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                  
             color_discrete_map={                
-                "Daerah Maju dan Cepat Tumbuh": "#031926",  
-                "Daerah Berkembang Cepat": "#468189",       
-                "Daerah Maju tapi Tertekan": "#9DBEBB",    
-                "Daerah Relatif Tertinggal": "#F4E9CD"      
+                "Daerah Maju dan Cepat Tumbuh": "#0D415C",  
+                "Daerah Berkembang Cepat": "#13BA8E",       
+                "Daerah Maju tapi Tertekan": "#A7E048",    
+                "Daerah Relatif Tertinggal": "#D9DADB"      
             },
-            mapbox_style="carto-positron", 
-            center={"lat": -2.5, "lon": 118.0}, 
-            zoom=3.5, 
-            opacity=0.8, 
-            labels={"klasifikasi": "Status Klasifikasi"}
+            mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "Status Klasifikasi"}
         )
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
         st.plotly_chart(fig, use_container_width=True)
@@ -231,10 +234,10 @@ def buat_scatter_sektoral(df_aktif, jenis_analisis):
         judul_full = 'Scatter Plot "Shift Share 2015/2025"'
         help_teks = "Metode Shift Share digunakan untuk menguraikan pertumbuhan suatu sektor ke dalam komponen pengaruh pertumbuhan nasional, struktur ekonomi, dan daya saing daerah. Melalui metode ini, dapat diketahui apakah kinerja suatu sektor didorong oleh dinamika nasional atau oleh keunggulan kompetitif yang dimiliki daerah."
         kriteria_teks = (
-            "- **Kriteria I (RS + IM +):** Sektor Tumbuh Pesat $\\rightarrow$ sektor yang memiliki daya saing tinggi di tingkat lokal dan didukung oleh tren pertumbuhan nasional.\n"
-            "- **Kriteria II (RS + IM -):** Sektor Berpotensi $\\rightarrow$ sektor yang kuat secara lokal meskipun secara nasional cenderung melambat, sehingga berpotensi menjadi keunggulan spesifik daerah.\n"
-            "- **Kriteria III (RS - IM +):** Sektor Berkembang $\\rightarrow$ sektor yang tumbuh secara nasional namun belum diikuti oleh daya saing daerah, sehingga memerlukan penguatan kapasitas lokal.\n"
-            "- **Kriteria IV (RS - IM -):** Sektor Tertinggal $\\rightarrow$ sektor dengan daya saing dan pertumbuhan yang rendah baik di tingkat lokal maupun nasional."
+            "- **Kriteria I (RS + IM +):** Sektor Tumbuh Pesat $\\rightarrow$ Sektor utama.\n"
+            "- **Kriteria II (RS + IM -):** Sektor Berpotensi $\\rightarrow$ Potensi andalan baru.\n"
+            "- **Kriteria III (RS - IM +):** Sektor Berkembang $\\rightarrow$ Perlu dijaga agar tidak turun.\n"
+            "- **Kriteria IV (RS - IM -):** Sektor Tertinggal $\\rightarrow$ Memerlukan perhatian khusus."
         )
         col_x, col_y = "im_2025", "rs_2025"
         garis_x, garis_y = 0.0, 0.0  
@@ -254,7 +257,7 @@ def buat_scatter_sektoral(df_aktif, jenis_analisis):
         labels_x, labels_y = "Rata-Rata Kontribusi (%)", "Rata-Rata Pertumbuhan (%)"
 
     if col_x not in df_aktif.columns or col_y not in df_aktif.columns:
-        return st.warning(f"Kolom {col_x} atau {col_y} tidak ditemukan pada data sektoral.")
+        return st.warning(f"Komom {col_x} atau {col_y} tidak ditemukan pada data sektoral.")
 
     st.markdown(f"##### {judul_full}", help=help_teks)
     col_grafik, col_narasi = st.columns([2, 1])
@@ -309,6 +312,23 @@ df_all_prov = load_data_aman(provinsi_terpilih, tahun_terpilih)
 df_sektoral_aktif = load_data_sektoral_aman(provinsi_terpilih)
 df_struktur_aktif = load_data_struktur_aman(provinsi_terpilih)
 
+st.markdown("#### 📊 Status Pemuatan Data Monitoring")
+status_makro, status_sektoral, status_struktur = st.columns(3)
+
+with status_makro:
+    if not df_all_prov.empty: st.success(f"✓ Data Makro ({len(df_all_prov)} Wilayah Terload)")
+    else: st.error(f"❌ Data Makro {tahun_terpilih} Kosong")
+
+with status_sektoral:
+    if not df_sektoral_aktif.empty: st.success(f"✓ Data Sektoral ({len(df_sektoral_aktif)} Sektor Terload)")
+    else: st.error("❌ Data Sektoral Kosong")
+
+with status_struktur:
+    if not df_struktur_aktif.empty: st.success(f"✓ Data Struktur ({len(df_struktur_aktif)} Tren Terload)")
+    else: st.error("❌ Data Struktur Kosong")
+
+st.markdown("---")
+
 df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
 df_active_dict = df_row.iloc[0].to_dict() if not df_row.empty else {}
 
@@ -348,8 +368,8 @@ st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
 q1, q2, q3, q4, q5 = st.columns(5)
 q1.metric("TW I YoY (%)", format_val(df_active_dict.get("lpe_tw1")))
 q2.metric("TW II YoY (%)", format_val(df_active_dict.get("lpe_tw2")))
-q3.metric("TW III YoY (%)", format_val(df_active_dict.get("lpe_tw3")))
-q4.metric("TW IV YoY (%)", format_val(df_active_dict.get("lpe_tw4")))
+q3.metric("TW III YoY (%)", format_val(df_active_dict.get("lpe_tw3"), "%"))
+q4.metric("TW IV YoY (%)", format_val(df_active_dict.get("lpe_tw4"), "%"))
 
 capaian_ctc = df_active_dict.get("lpe_ctc", np.nan)
 capaian_ctc_str = format_val(capaian_ctc)
