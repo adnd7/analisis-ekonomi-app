@@ -1,5 +1,3 @@
-# APPY FIX
-
 # app.py
 
 import streamlit as st
@@ -130,10 +128,6 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     st.plotly_chart(fig, use_container_width=True)
 
 def buat_peta_klasifikasi(df_aktif):
-    """
-    URUTAN 1: Visualisasi Peta Choropleth 38 Provinsi dengan Skema Warna KEMD resmi.
-    Menangani sinkronisasi nama DI Yogyakarta agar sinkron dengan standar GeoJSON.
-    """
     if df_aktif is None or df_aktif.empty or "klasifikasi" not in df_aktif.columns:
         st.warning("Data kosong atau kolom klasifikasi tidak ditemukan, peta tidak dapat dimuat.")
         return
@@ -250,10 +244,10 @@ def buat_scatter_sektoral(df_aktif, jenis_analisis):
         judul_full = 'Scatter Plot "Tipologi Klassen Rata-Rata 2022-2025"'
         help_teks = "Tipologi Klassen merupakan metode klasifikasi sektor berdasarkan tingkat pertumbuhan dan kontribusinya terhadap perekonomian daerah. Hasil analisisnya memberikan gambaran yang jelas mengenai posisi relatif setiap sektor, mulai dari sektor unggulan hingga sektor yang masih tertinggal, sehingga mendukung perumusan arah pembangunan ekonomi daerah."
         kriteria_teks = (
-            "- **Kriteria I (Rasio Pertumbuhan > 1 dan LQ > 1):** Sektor Unggulan dan Dominan $\\rightarrow$ sektor dengan pertumbuhan tinggi dan kontribusi besar yang menjadi motor utama perekonomian daerah.\n"
-            "- **Kriteria II (Rasio Pertumbuhan > 1 dan LQ < 1):** Sektor Berkembang $\\rightarrow$ sektor dengan pertumbuhan tinggi namun kontribusinya masih kecil, sehingga berpotensi menjadi sumber pertumbuhan baru.\n"
-            "- **Kriteria III (Rasio Pertumbuhan < 1 dan LQ > 1):** Sektor Potensial $\\rightarrow$ sektor dengan kontribusi besar tetapi pertumbuhannya mulai melambat, sehingga perlu dijaga keberlanjutannya.\n"
-            "- **Kriteria IV (Rasio Pertumbuhan < 1 dan LQ < 1):** Sektor Tertinggal $\\rightarrow$ sektor dengan pertumbuhan dan kontribusi yang rendah, sehingga belum memiliki peran signifikan dalam perekonomian."
+            "- **Kriteria I (Pertumbuhan > Nas & Kontribusi > Nas):** Sektor Andalan $\\rightarrow$ Sektor utama.\n"
+            "- **Kriteria II (Pertumbuhan > Nas & Kontribusi < Nas):** Sektor Berkembang $\\rightarrow$ Potensi andalan baru.\n"
+            "- **Kriteria III (Pertumbuhan < Nas & Kontribusi > Nas):** Sektor Potensial $\\rightarrow$ Perlu dijaga agar tidak turun.\n"
+            "- **Kriteria IV (Pertumbuhan < Nas & Kontribusi < Nas):** Sektor Tertinggal $\\rightarrow$ Memerlukan perhatian khusus."
         )
         col_x, col_y = "kontribusi_2025", "pertumbuhan_2025"
         garis_x, garis_y = 5.6, 5.1  
@@ -335,9 +329,19 @@ st.markdown("---")
 df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
 df_active_dict = df_row.iloc[0].to_dict() if not df_row.empty else {}
 
+# ==========================================
+# MODIFIKASI FORMULASI: Memaksa pembulatan 1 angka belakang koma (:.1f)
+# ==========================================
 def format_val(val, unit=""):
-    if pd.isna(val) or val == "" or str(val).lower() == 'nan': return "-"
-    return f"{val}{unit}"
+    if pd.isna(val) or val == "" or str(val).lower() == 'nan': 
+        return "-"
+    try:
+        # Jika berupa tipe angka murni, potong paksa menjadi 1 desimal belakang koma
+        val_float = float(val)
+        return f"{val_float:.1f}{unit}"
+    except ValueError:
+        # Jika berupa kalimat narasi (seperti rekomendasi/nama subsektor), biarkan lolos berupa teks asli
+        return f"{val}{unit}"
 
 st.header("1. KONDISI EKONOMI MAKRO DAERAH 38 PROVINSI")
 col_Grafik1, col_Grafik2 = st.columns(2)
@@ -359,10 +363,10 @@ buat_line_growth(provinsi_terpilih)
 
 st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
 q1, q2, q3, q4, q5 = st.columns(5)
-q1.metric("TW I YoY", format_val(df_active_dict.get("lpe_tw1"), "%"))
-q2.metric("TW II YoY", format_val(df_active_dict.get("lpe_tw2"), "%"))
-q3.metric("TW III YoY", format_val(df_active_dict.get("lpe_tw3"), "%"))
-q4.metric("TW IV YoY", format_val(df_active_dict.get("lpe_tw4"), "%"))
+q1.metric("TW I YoY (%)", format_val(df_active_dict.get("lpe_tw1")))
+q2.metric("TW II YoY (%)", format_val(df_active_dict.get("lpe_tw2")))
+q3.metric("TW III YoY (%)", format_val(df_active_dict.get("lpe_tw3")))
+q4.metric("TW IV YoY (%)", format_val(df_active_dict.get("lpe_tw4")))
 
 capaian_ctc = df_active_dict.get("lpe_ctc", np.nan)
 capaian_ctc_str = format_val(capaian_ctc, "%")
@@ -409,8 +413,8 @@ with col_ek5: st.metric(label="Tenaga Kerja Terbesar", value=format_val(df_activ
 
 col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
 with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
-with col_sos2: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan'), "%"))
-with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt'), "%"))
+with col_sos2: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
+with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
 with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 st.markdown("---")
