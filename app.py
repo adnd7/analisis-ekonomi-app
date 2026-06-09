@@ -134,20 +134,18 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
     df_sorted = df_aktif.dropna(subset=[kolom_nilai]).sort_values(by=kolom_nilai, ascending=True).copy()
     
     # --------------------------------------------------------------------------
-    # LOGIKAPEMBEDA DAERAH TERPILIH
+    # LOGIKA PEMBEDA DAERAH TERPILIH
     # --------------------------------------------------------------------------
-    # 1. Menambahkan penanda teks pada sumbu Y agar terlihat jelas di list
+    # 1. Menambahkan penanda teks 📍 pada sumbu Y agar terlihat jelas
     df_sorted['label_provinsi'] = df_sorted['provinsi'].apply(
         lambda x: f"<b>📍 {x}</b>" if str(x).strip().lower() == str(provinsi_aktif).strip().lower() else x
     )
     
     # 2. Membuat list warna kustom untuk tiap bar
-    # Jika bar tersebut adalah daerah terpilih, diberi warna merah-oranye mencolok (#EF4444)
-    # Jika bukan, biarkan nilainya berupa angka untuk dilempar ke color_continuous_scale
     warna_kustom = []
     for idx, row in df_sorted.iterrows():
         if str(row['provinsi']).strip().lower() == str(provinsi_aktif).strip().lower():
-            warna_kustom.append("#EF4444") # Warna pembeda mencolok untuk daerah terpilih
+            warna_kustom.append("#EF4444") # Warna pembeda mencolok (Merah)
         else:
             warna_kustom.append(row[kolom_nilai])
 
@@ -156,7 +154,6 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
 
     # Build Figure
     if ada_terpilih:
-        # Jika ada daerah terpilih, kita gunakan go.Bar agar bisa menerima array campuran (Hex Color + Nilai Numerik)
         fig = go.Figure(go.Bar(
             x=df_sorted[kolom_nilai],
             y=df_sorted['label_provinsi'],
@@ -165,7 +162,16 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                 color=warna_kustom,
                 colorscale=skala_warna,
                 showscale=True,
-                colorbar=dict(title=label_x)
+                # PERBAIKAN 1: Mengatur ukuran skala warna agar presisi dan pas (thickness & len)
+                colorbar=dict(
+                    title=label_x,
+                    thickness=15,
+                    len=0.6,
+                    yanchor="middle",
+                    y=0.5
+                ),
+                # PERBAIKAN 2: Memaksa garis tepi bar menjadi 0 agar tidak ada border kaku/jelek
+                line=dict(width=0)
             ),
             text=df_sorted[kolom_nilai],
             texttemplate='%{text:.1f}',
@@ -179,7 +185,13 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                      color=kolom_nilai, color_continuous_scale=skala_warna)
         fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
         
-    fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10})
+    # PERBAIKAN 3: Menghilangkan garis grid luar yang mengganggu layout dashboard
+    fig.update_layout(
+        height=750, 
+        margin={"r":40,"t":10,"l":10,"b":10},
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 def buat_peta_klasifikasi(df_aktif):
