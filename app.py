@@ -337,6 +337,7 @@ with col_Grafik2:
     buat_bar_chart_makro(df_all_prov, "Kontribusi PDRB")
 
 st.subheader(f"🗺️ Sebaran Klasifikasi Wilayah")
+st.markdown("*Klasifikasi menggunakan metode Tipologi Klassen dengan mempertimbangkan rata-rata pertumbuhan ekonomi dan PDRB per Kapita Tahun 2022-2025*")
 buat_peta_klasifikasi(df_all_prov)
 
 st.markdown("---")
@@ -402,7 +403,7 @@ with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('t
 with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 st.markdown("---")
-st.header(f"3. ANALISIS SECTOR UNGGULAN DAERAH {provinsi_terpilih.upper()}")
+st.header(f"3. ANALISIS SEKTOR UNGGULAN DAERAH {provinsi_terpilih.upper()}")
 buat_scatter_sektoral(df_sektoral_aktif, "Overlay")
 buat_scatter_sektoral(df_sektoral_aktif, "Shift Share")
 buat_scatter_sektoral(df_sektoral_aktif, "Tipologi Klassen")
