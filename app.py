@@ -146,8 +146,8 @@ def buat_peta_klasifikasi(df_aktif):
         
         # Mengubah nama "DI Yogyakarta" menjadi "DAERAH ISTIMEWA YOGYAKARTA" agar dibaca oleh GeoJSON
         df_peta['provinsi'] = df_peta['provinsi'].replace({
-            "DI Yogyakarta": "DAERAH ISTIMEWA YOGYAKARTA",
-            "D.I. Yogyakarta": "DAERAH ISTIMEWA YOGYAKARTA"
+            "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
+            "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta"
         })
             
         fig = px.choropleth_mapbox(
