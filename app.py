@@ -131,14 +131,6 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
         # AKTIVASI LABEL: Menampilkan angka statistik 1 desimal di ujung luar bar grafik
         fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
 
-    # --------------------------------------------------------------------------
-    # LOGIKA PEMBEDA DAERAH TERPILIH (MENGGUNAKAN PIN)
-    # --------------------------------------------------------------------------
-    # 1. Menambahkan penanda emoji pin "📍" dan teks tebal pada sumbu Y
-    df_sorted['label_provinsi'] = df_sorted['provinsi'].apply(
-        lambda x: f"<b>📍 {x} (Dipilih)</b>" if str(x).strip().lower() == str(provinsi_aktif).strip().lower() else x
-    )
-    
     fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10})
     st.plotly_chart(fig, use_container_width=True)
 
