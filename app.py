@@ -118,7 +118,7 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     if tipe_chart == "Pertumbuhan Ekonomi":
         if "lpe_ctc" not in df_aktif.columns: return st.warning("Kolom lpe_ctc tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["lpe_ctc"]).sort_values(by="lpe_ctc", ascending=True)
-        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
+        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
     else:
         if "kontribusi" not in df_aktif.columns: return st.warning("Kolom kontribusi tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["kontribusi"]).sort_values(by="kontribusi", ascending=True)
