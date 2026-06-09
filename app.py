@@ -500,18 +500,13 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-col_ek1, col_ek2, col_ek3, col_ek4, col_ek5 = st.columns(5)
+col_ek1, col_ek2, col_ek3, col_ek4, col_ek5, col_ek6 = st.columns(6)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
-
-# --- BAGIAN PERUBAHAN INVESTASI (DIPISAH MENJADI METRIC DAN BERIKAN FORMAT RIBUAN) ---
-with col_ek3:
-    st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
-    st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
-# ------------------------------------------------------------------------------------
-
-with col_ek4: st.metric(label="Ekspor Terbesar", value=format_val(df_active_dict.get('ekspor_top3')))
-with col_ek5: st.metric(label="Tenaga Kerja Terbesar", value=format_val(df_active_dict.get('naker_top')))
+with col_ek3: st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
+with col_ek4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
+with col_ek5: st.metric(label="Ekspor Terbesar", value=format_val(df_active_dict.get('ekspor_top3')))
+with col_ek6: st.metric(label="Tenaga Kerja Terbesar", value=format_val(df_active_dict.get('naker_top')))
 
 col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
 with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
