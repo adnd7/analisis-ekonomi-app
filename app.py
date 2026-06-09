@@ -500,6 +500,22 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
+# Tambahkan custom CSS untuk memaksa teks nilai st.metric turun ke bawah & mengecil jika panjang
+st.markdown(
+    """
+    <style>
+    /* Menargetkan teks nilai (value) dari st.metric */
+    div[data-testid="stMetricValue"] {
+        font-size: calc(1.2rem + 0.6vw) !important; /* Ukuran font dinamis agar mengecil di layar kecil */
+        white-space: normal !important;            /* Memperbolehkan teks turun ke bawah */
+        word-break: break-word !important;         /* Memotong kata yang terlalu panjang jika perlu */
+        line-height: 1.2 !important;               /* Mengatur jarak antar baris agar rapi */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 col_ek1, col_ek2, col_ek3, col_ek4, col_ek5, col_ek6 = st.columns(6)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
