@@ -111,7 +111,7 @@ def get_warna_sektor_map(df_column):
     return {sektor: WARNA_SEKTOR_GLOBAL.get(str(sektor).lower(), "#6B7280") for sektor in df_column.unique()}
 
 # ------------------------------------------------------------------------------
-# PERBAIKAN GRAFIK: Menambahkan Data Label 1 Angka di Belakang Koma
+# PERBAIKAN GRAFIK: Memunculkan Data Label 1 Angka di Belakang Koma
 # ------------------------------------------------------------------------------
 def buat_bar_chart_makro(df_aktif, tipe_chart):
     if df_aktif is None or df_aktif.empty:
@@ -121,21 +121,17 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     if tipe_chart == "Pertumbuhan Ekonomi":
         if "lpe_ctc" not in df_aktif.columns: return st.warning("Kolom lpe_ctc tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["lpe_ctc"]).sort_values(by="lpe_ctc", ascending=True)
-        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', 
-                     labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, 
-                     color="lpe_ctc", color_continuous_scale="Viridis")
-        # Format label angka desimal: %{x:.1f} artinya mengambil sumbu X dipotong 1 angka desimal
+        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
+        # AKTIVASI LABEL: Menampilkan angka statistik 1 desimal di ujung luar bar grafik
         fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
     else:
         if "kontribusi" not in df_aktif.columns: return st.warning("Kolom kontribusi tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["kontribusi"]).sort_values(by="kontribusi", ascending=True)
-        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', 
-                     labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, 
-                     color="kontribusi", color_continuous_scale="Cividis")
-        # Format label angka desimal: %{x:.1f} artinya mengambil sumbu X dipotong 1 angka desimal
+        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, color="kontribusi", color_continuous_scale="Cividis")
+        # AKTIVASI LABEL: Menampilkan angka statistik 1 desimal di ujung luar bar grafik
         fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
         
-    fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10}) # Menaikkan height ke 750 agar label teks tidak tumpang tindih
+    fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10})
     st.plotly_chart(fig, use_container_width=True)
 
 def buat_peta_klasifikasi(df_aktif):
@@ -163,10 +159,10 @@ def buat_peta_klasifikasi(df_aktif):
         fig = px.choropleth_mapbox(
             df_peta, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                  
             color_discrete_map={                
-                "Daerah Maju dan Cepat Tumbuh": "#031926",  
-                "Daerah Berkembang Cepat": "#468189",       
-                "Daerah Maju tapi Tertekan": "#9DBEBB",    
-                "Daerah Relatif Tertinggal": "#F4E9CD"      
+                "Daerah Maju dan Cepat Tumbuh": "#0D415C",  
+                "Daerah Berkembang Cepat": "#13BA8E",       
+                "Daerah Maju tapi Tertekan": "#A7E048",    
+                "Daerah Relatif Tertinggal": "#D9DADB"      
             },
             mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "Status Klasifikasi"}
         )
@@ -175,6 +171,9 @@ def buat_peta_klasifikasi(df_aktif):
     except Exception as e:
         st.info(f"🗺️ *[Gagal memuat peta GeoJSON. Error: {e}]*")
 
+# ------------------------------------------------------------------------------
+# PERBAIKAN GRAFIK TREN: Mengubah Nama Legenda Menjadi Inflasi Nasional
+# ------------------------------------------------------------------------------
 def buat_line_growth(provinsi):
     df_raw = smart_load("data_ekonomi")
     if df_raw is None or df_raw.empty: return
@@ -191,7 +190,8 @@ def buat_line_growth(provinsi):
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_ctc'], name=f"{provinsi} (c-to-c)", mode='lines+markers', line=dict(width=3, color='#1D4ED8')))
-        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['inflasi'], name='Inflasi Wilayah', mode='lines+markers', line=dict(dash='dash', color='#DC2626')))
+        # PERBAIKAN: Mengubah parameter name trace tren inflasi menjadi 'Inflasi Nasional'
+        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['inflasi'], name='Inflasi Nasional', mode='lines+markers', line=dict(dash='dash', color='#DC2626')))
         
         fig.update_layout(xaxis=dict(dtick=1, type='category'), xaxis_title="Tahun", yaxis_title="Persentase (%)", margin={"r":10,"t":30,"l":10,"b":10}, legend_orientation="h")
         st.plotly_chart(fig, use_container_width=True)
@@ -312,6 +312,23 @@ df_all_prov = load_data_aman(provinsi_terpilih, tahun_terpilih)
 df_sektoral_aktif = load_data_sektoral_aman(provinsi_terpilih)
 df_struktur_aktif = load_data_struktur_aman(provinsi_terpilih)
 
+st.markdown("#### 📊 Status Pemuatan Data Monitoring")
+status_makro, status_sektoral, status_struktur = st.columns(3)
+
+with status_makro:
+    if not df_all_prov.empty: st.success(f"✓ Data Makro ({len(df_all_prov)} Wilayah Terload)")
+    else: st.error(f"❌ Data Makro {tahun_terpilih} Kosong")
+
+with status_sektoral:
+    if not df_sektoral_aktif.empty: st.success(f"✓ Data Sektoral ({len(df_sektoral_aktif)} Sektor Terload)")
+    else: st.error("❌ Data Sektoral Kosong")
+
+with status_struktur:
+    if not df_struktur_aktif.empty: st.success(f"✓ Data Struktur ({len(df_struktur_aktif)} Tren Terload)")
+    else: st.error("❌ Data Struktur Kosong")
+
+st.markdown("---")
+
 df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
 df_active_dict = df_row.iloc[0].to_dict() if not df_row.empty else {}
 
@@ -322,11 +339,9 @@ def format_val(val, unit=""):
     if pd.isna(val) or val == "" or str(val).lower() == 'nan': 
         return "-"
     try:
-        # Jika berupa tipe angka murni, potong paksa menjadi 1 desimal belakang koma
         val_float = float(val)
         return f"{val_float:.1f}{unit}"
     except ValueError:
-        # Jika berupa kalimat narasi (seperti rekomendasi/nama subsektor), biarkan lolos berupa teks asli
         return f"{val}{unit}"
 
 st.header("1. KONDISI EKONOMI MAKRO DAERAH 38 PROVINSI")
