@@ -457,6 +457,8 @@ st.header(f"2. KINERJA INDIKATOR EKONOMI DAN SOSIAL {provinsi_terpilih.upper()}"
 
 st.markdown("#### Pertumbuhan Ekonomi (YoY)")
 help_teks = "Data tahun 2026 bersifat sangat sementara (c-to-c)"
+# Tambahkan komponen subheader atau informasi baru yang membawa variabel tersebut:
+st.caption("Tren Historis LPE", help=help_teks)
 buat_line_growth(provinsi_terpilih)
 
 st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
