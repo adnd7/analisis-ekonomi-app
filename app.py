@@ -125,6 +125,10 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     st.plotly_chart(fig, use_container_width=True)
 
 def buat_peta_klasifikasi(df_aktif):
+    """
+    URUTAN 1: Visualisasi Peta Choropleth 38 Provinsi dengan Skema Warna KEMD resmi.
+    Menangani sinkronisasi nama DI Yogyakarta agar sinkron dengan standar GeoJSON.
+    """
     if df_aktif is None or df_aktif.empty or "klasifikasi" not in df_aktif.columns:
         st.warning("Data kosong atau kolom klasifikasi tidak ditemukan, peta tidak dapat dimuat.")
         return
@@ -137,15 +141,32 @@ def buat_peta_klasifikasi(df_aktif):
         with open(geojson_path, "r") as f:
             geojson_indonesia = json.load(f)
             
+        # SINKRONISASI PETA: Membuat salinan data khusus untuk peta agar data asli Excel tidak rusak
+        df_peta = df_aktif.copy()
+        
+        # Mengubah nama "DI Yogyakarta" menjadi "DAERAH ISTIMEWA YOGYAKARTA" agar dibaca oleh GeoJSON
+        df_peta['provinsi'] = df_peta['provinsi'].replace({
+            "DI Yogyakarta": "DAERAH ISTIMEWA YOGYAKARTA",
+            "D.I. Yogyakarta": "DAERAH ISTIMEWA YOGYAKARTA"
+        })
+            
         fig = px.choropleth_mapbox(
-            df_aktif, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                 
+            df_peta, # Gunakan dataframe tiruan yang sudah disinkronkan namanya
+            geojson=geojson_indonesia, 
+            locations="provinsi", 
+            featureidkey="properties.PROVINSI", # Menghubungkan ke nama provinsi di GeoJSON
+            color="klasifikasi",                  
             color_discrete_map={                
                 "Daerah Maju dan Cepat Tumbuh": "#0D415C",  
                 "Daerah Berkembang Cepat": "#13BA8E",       
                 "Daerah Maju tapi Tertekan": "#A7E048",    
-                "Daerah Relatif Tertinggal": "#FBDB65"      
+                "Daerah Relatif Tertinggal": "#D9DADB"      
             },
-            mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "Status Klasifikasi"}
+            mapbox_style="carto-positron", 
+            center={"lat": -2.5, "lon": 118.0}, 
+            zoom=3.5, 
+            opacity=0.8, 
+            labels={"klasifikasi": "Status Klasifikasi"}
         )
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
         st.plotly_chart(fig, use_container_width=True)
