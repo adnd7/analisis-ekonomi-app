@@ -172,7 +172,7 @@ def buat_peta_klasifikasi(df_aktif):
         st.info(f"🗺️ *[Gagal memuat peta GeoJSON. Error: {e}]*")
 
 # ------------------------------------------------------------------------------
-# PERBAIKAN GRAFIK TREN: Mengubah Nama Legenda Menjadi Inflasi Nasional
+# PERBAIKAN GRAFIK TREN: Mengubah Nama Legenda Menjadi Nasional
 # ------------------------------------------------------------------------------
 def buat_line_growth(provinsi):
     df_raw = smart_load("data_ekonomi")
@@ -189,9 +189,9 @@ def buat_line_growth(provinsi):
         df_prov['lpe_nasional'] = pd.to_numeric(df_prov['lpe_nasional'].astype(str).str.replace(',', '.', regex=False).str.strip().replace('-', np.nan), errors='coerce')
         
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_ctc'], name=f"{provinsi} (c-to-c)", mode='lines+markers', line=dict(width=3, color='#1D4ED8')))
-        # PERBAIKAN: Mengubah parameter name trace tren inflasi menjadi 'Inflasi Nasional'
-        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_nasional'], name='Nasional', mode='lines+markers', line=dict(dash='dash', color='#DC2626')))
+        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_ctc'], name=f"{provinsi} (c-to-c)", mode='lines+markers', line=dict(width=3, color='#1D4ED8', shape='spline')))
+        # MENAMBAHKAN line_shape='spline' PADA LINE NASIONAL
+        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_nasional'], name='Nasional', mode='lines+markers', line=dict(dash='dash', color='#DC2626', shape='spline')))
         
         fig.update_layout(xaxis=dict(dtick=1, type='category'), xaxis_title="Tahun", yaxis_title="Persentase (%)", margin={"r":10,"t":30,"l":10,"b":10}, legend_orientation="h")
         st.plotly_chart(fig, use_container_width=True)
