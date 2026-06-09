@@ -309,23 +309,6 @@ df_all_prov = load_data_aman(provinsi_terpilih, tahun_terpilih)
 df_sektoral_aktif = load_data_sektoral_aman(provinsi_terpilih)
 df_struktur_aktif = load_data_struktur_aman(provinsi_terpilih)
 
-st.markdown("#### 📊 Status Pemuatan Data Monitoring")
-status_makro, status_sektoral, status_struktur = st.columns(3)
-
-with status_makro:
-    if not df_all_prov.empty: st.success(f"✓ Data Makro ({len(df_all_prov)} Wilayah Terload)")
-    else: st.error(f"❌ Data Makro {tahun_terpilih} Kosong")
-
-with status_sektoral:
-    if not df_sektoral_aktif.empty: st.success(f"✓ Data Sektoral ({len(df_sektoral_aktif)} Sektor Terload)")
-    else: st.error("❌ Data Sektoral Kosong")
-
-with status_struktur:
-    if not df_struktur_aktif.empty: st.success(f"✓ Data Struktur ({len(df_struktur_aktif)} Tren Terload)")
-    else: st.error("❌ Data Struktur Kosong")
-
-st.markdown("---")
-
 df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
 df_active_dict = df_row.iloc[0].to_dict() if not df_row.empty else {}
 
