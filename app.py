@@ -113,24 +113,72 @@ def get_warna_sektor_map(df_column):
 # ------------------------------------------------------------------------------
 # PERBAIKAN GRAFIK: Memunculkan Data Label 1 Angka di Belakang Koma
 # ------------------------------------------------------------------------------
-def buat_bar_chart_makro(df_aktif, tipe_chart):
+def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
     if df_aktif is None or df_aktif.empty:
-        st.warning("Data makro untuk grafik batang kosong.")
+        st.warning("Data makro untuk grafik grafik batang kosong.")
         return
 
+    # Menentukan kolom berdasarkan jenis chart
     if tipe_chart == "Pertumbuhan Ekonomi":
         if "lpe_ctc" not in df_aktif.columns: return st.warning("Kolom lpe_ctc tidak ditemukan.")
-        df_sorted = df_aktif.dropna(subset=["lpe_ctc"]).sort_values(by="lpe_ctc", ascending=True)
-        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
-        # AKTIVASI LABEL: Menampilkan angka statistik 1 desimal di ujung luar bar grafik
-        fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
+        kolom_nilai = "lpe_ctc"
+        label_x = "LPE c-to-c (%)"
+        skala_warna = "Viridis"
     else:
         if "kontribusi" not in df_aktif.columns: return st.warning("Kolom kontribusi tidak ditemukan.")
-        df_sorted = df_aktif.dropna(subset=["kontribusi"]).sort_values(by="kontribusi", ascending=True)
-        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, color="kontribusi", color_continuous_scale="Cividis")
-        # AKTIVASI LABEL: Menampilkan angka statistik 1 desimal di ujung luar bar grafik
-        fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
+        kolom_nilai = "kontribusi"
+        label_x = "Kontribusi PDRB (%)"
+        skala_warna = "Cividis"
 
+    # Sorting data agar berurutan dari terkecil ke terbesar pada grafik horizontal
+    df_sorted = df_aktif.dropna(subset=[kolom_nilai]).sort_values(by=kolom_nilai, ascending=True).copy()
+    
+    # --------------------------------------------------------------------------
+    # LOGIKAPEMBEDA DAERAH TERPILIH
+    # --------------------------------------------------------------------------
+    # 1. Menambahkan penanda teks "(Dipilih)" pada sumbu Y agar terlihat jelas di list
+    df_sorted['label_provinsi'] = df_sorted['provinsi'].apply(
+        lambda x: f"<b>⭐ {x} (Dipilih)</b>" if str(x).strip().lower() == str(provinsi_aktif).strip().lower() else x
+    )
+    
+    # 2. Membuat list warna kustom untuk tiap bar
+    # Jika bar tersebut adalah daerah terpilih, diberi warna merah-oranye mencolok (#EF4444)
+    # Jika bukan, biarkan nilainya berupa angka untuk dilempar ke color_continuous_scale
+    warna_kustom = []
+    for idx, row in df_sorted.iterrows():
+        if str(row['provinsi']).strip().lower() == str(provinsi_aktif).strip().lower():
+            warna_kustom.append("#EF4444") # Warna pembeda mencolok untuk daerah terpilih
+        else:
+            warna_kustom.append(row[kolom_nilai])
+
+    # Cek apakah daerah terpilih ada di dalam list data saat ini
+    ada_terpilih = df_sorted['provinsi'].str.strip().str.lower().eq(str(provinsi_aktif).strip().lower()).any()
+
+    # Build Figure
+    if ada_terpilih:
+        # Jika ada daerah terpilih, kita gunakan go.Bar agar bisa menerima array campuran (Hex Color + Nilai Numerik)
+        fig = go.Figure(go.Bar(
+            x=df_sorted[kolom_nilai],
+            y=df_sorted['label_provinsi'],
+            orientation='h',
+            marker=dict(
+                color=warna_kustom,
+                colorscale=skala_warna,
+                showscale=True,
+                colorbar=dict(title=label_x)
+            ),
+            text=df_sorted[kolom_nilai],
+            texttemplate='%{text:.1f}',
+            textposition='outside'
+        ))
+        fig.update_layout(xaxis_title=label_x, yaxis_title="Provinsi")
+    else:
+        # Fallback ke standar Plotly Express jika tidak ada daerah yang cocok
+        fig = px.bar(df_sorted, x=kolom_nilai, y="label_provinsi", orientation='h', 
+                     labels={kolom_nilai: label_x, "label_provinsi": "Provinsi"}, 
+                     color=kolom_nilai, color_continuous_scale=skala_warna)
+        fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
+        
     fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10})
     st.plotly_chart(fig, use_container_width=True)
 
@@ -331,10 +379,12 @@ st.header("1. KONDISI EKONOMI MAKRO DAERAH 38 PROVINSI")
 col_Grafik1, col_Grafik2 = st.columns(2)
 with col_Grafik1:
     st.subheader(f"Laju Pertumbuhan Ekonomi ({tahun_terpilih})")
-    buat_bar_chart_makro(df_all_prov, "Pertumbuhan Ekonomi")
+    # PERBAIKAN: Menambahkan argumen provinsi_terpilih
+    buat_bar_chart_makro(df_all_prov, "Pertumbuhan Ekonomi", provinsi_terpilih) 
 with col_Grafik2:
     st.subheader(f"Kontribusi PDRB terhadap Nasional ({tahun_terpilih})")
-    buat_bar_chart_makro(df_all_prov, "Kontribusi PDRB")
+    # PERBAIKAN: Menambahkan argumen provinsi_terpilih
+    buat_bar_chart_makro(df_all_prov, "Kontribusi PDRB", provinsi_terpilih)
 
 st.subheader(f"🗺️ Sebaran Klasifikasi Wilayah")
 buat_peta_klasifikasi(df_all_prov)
