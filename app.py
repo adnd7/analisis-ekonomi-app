@@ -359,7 +359,7 @@ capaian_ctc_str = format_val(capaian_ctc)
 with q5:
     st.markdown(
         f'<div style="background-color:#0A192F; color:white; padding:10px; border-radius:5px; text-align:center;">'
-        f'<p style="margin:0; font-size:12px;">Capaian c-to-c (%)</p>'
+        f'<p style="margin:0; font-size:17px;">Capaian c-to-c (%)</p>'
         f'<h3 style="margin:0; color:#00CC96;">{capaian_ctc_str}</h3>'
         f'</div>', unsafe_allow_html=True
     )
