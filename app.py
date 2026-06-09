@@ -13,8 +13,9 @@ st.set_page_config(page_title="Ekonomi Makro Daerah", layout="wide", page_icon="
 # ==========================================
 @st.cache_data
 def smart_load(filename_base):
-    """Mencari file baik dalam format .csv maupun .xlsx di folder root maupun folder 'data'"""
-    formats = ['.csv', '.xlsx']
+    """Mencari file baik dalam format .xlsx maupun .csv di folder root maupun folder 'data'"""
+    # Membalik urutan: Cek .xlsx terlebih dahulu sebelum .csv
+    formats = ['.xlsx', '.csv'] 
     folders = ['', 'data/']
     
     for fldr in folders:
@@ -22,23 +23,27 @@ def smart_load(filename_base):
             path = f"{fldr}{filename_base}{fmt}"
             if os.path.exists(path):
                 try:
-                    if fmt == '.csv':
-                        try:
-                            df = pd.read_csv(path, sep=";", engine='python')
-                            if len(df.columns) < 2: # Jika gagal baca sep=";" coba sep=","
-                                df = pd.read_csv(path, sep=",", engine='python')
-                        except:
-                            df = pd.read_csv(path, sep=",", engine='python')
+                    if fmt == '.xlsx':
+                        # Pembacaan file Excel menggunakan engine openpyxl
+                        df = pd.read_excel(path, engine='openpyxl')
                     else:
-                        df = pd.read_excel(path)
+                        # Jika terpaksa membaca CSV, gunakan encoding='cp1252' atau 'latin-1' 
+                        # agar karakter seperti 0x93 (tanda kutip Excel) tidak bikin error
+                        try:
+                            df = pd.read_csv(path, sep=";", encoding='cp1252', engine='python')
+                            if len(df.columns) < 2:
+                                df = pd.read_csv(path, sep=",", encoding='cp1252', engine='python')
+                        except:
+                            df = pd.read_csv(path, sep=",", encoding='cp1252', engine='python')
                     
-                    # Bersihkan nama kolom
+                    # Bersihkan nama kolom menjadi huruf kecil murni
                     df.columns = df.columns.astype(str).str.strip().str.lower()
                     return df
                 except Exception as e:
-                    st.error(f"Gagal membaca file {path}: {e}")
-                    return pd.DataFrame()
-    return pd.DataFrame() # Jika tidak ketemu
+                    # Biarkan sistem terus mencari ke kombinasi folder/format selanjutnya jika yang ini gagal
+                    continue
+                    
+    return pd.DataFrame() # Jika tidak ketemu sama sekali
 
 def load_data_aman(provinsi, tahun):
     df_all = smart_load("data_ekonomi")
