@@ -136,9 +136,9 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
     # --------------------------------------------------------------------------
     # LOGIKAPEMBEDA DAERAH TERPILIH
     # --------------------------------------------------------------------------
-    # 1. Menambahkan penanda teks "(Dipilih)" pada sumbu Y agar terlihat jelas di list
+    # 1. Menambahkan penanda teks pada sumbu Y agar terlihat jelas di list
     df_sorted['label_provinsi'] = df_sorted['provinsi'].apply(
-        lambda x: f"<b>⭐ {x} (Dipilih)</b>" if str(x).strip().lower() == str(provinsi_aktif).strip().lower() else x
+        lambda x: f"<b>📍 {x}</b>" if str(x).strip().lower() == str(provinsi_aktif).strip().lower() else x
     )
     
     # 2. Membuat list warna kustom untuk tiap bar
