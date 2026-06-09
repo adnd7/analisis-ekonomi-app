@@ -253,56 +253,62 @@ def buat_line_growth(provinsi):
         
         fig = go.Figure()
         
-        # 1. TRACE DAERAH (Warna Biru Utama, Label Kotak Biru Muda, 1 Angka Belakang Koma)
+        # 1. TRACE DAERAH (Kotak Lapisan Luar Biru Muda, Label di Atas)
         fig.add_trace(go.Scatter(
             x=df_prov['tahun'], 
             y=df_prov['lpe_ctc'], 
             name=f"{provinsi} (c-to-c)", 
-            mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
-            text=df_prov['lpe_ctc'].round(1), # Pembulatan data label 1 angka belakang koma
-            textposition='top center',
+            mode='lines+markers+text',
+            text=df_prov['lpe_ctc'],
+            textposition='top center',  # Dipaksa di atas titik
+            texttemplate='%{text:.1f}', # Format 1 angka belakang koma
             textfont=dict(
-                color='#1E3A8A', # Font warna biru gelap agar terbaca jelas
-                size=10
+                color='#1E3A8A',       # Font biru gelap agar kontras
+                size=11
             ),
-            # Membuat kotak biru muda (background text) sebagai pembungkus label daerah
-            texttemplate='<span style="background-color: #E0F2FE; border: 1px solid #BAE6FD; padding: 2px 4px; border-radius: 3px;">%{text:.1f}</span>',
+            # Trik Plotly khusus: Mengubah texttemplate menjadi format balok dengan html style inline ganda
+            textfont_backgroundcolor='#E0F2FE', # KOTAK BIRU MUDA
+            textfont_bordercolor='#BAE6FD',     # Garis tepi kotak
             line=dict(width=3, color='#1D4ED8', shape='spline'),
             marker=dict(size=8)
         ))
         
-        # 2. TRACE NASIONAL (Warna Merah Utama, Label Kotak Merah Soft, 1 Angka Belakang Koma)
+        # 2. TRACE NASIONAL (Kotak Lapisan Luar Merah Soft, Label di Atas)
         fig.add_trace(go.Scatter(
             x=df_prov['tahun'], 
             y=df_prov['lpe_nasional'], 
             name='Nasional (c-to-c)', 
-            mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
-            text=df_prov['lpe_nasional'].round(1), # Pembulatan data label 1 angka belakang koma
-            textposition='bottom center',
+            mode='lines+markers+text',
+            text=df_prov['lpe_nasional'],
+            textposition='top center',  # Dipaksa di atas titik juga
+            texttemplate='%{text:.1f}', # Format 1 angka belakang koma
             textfont=dict(
-                color='#7F1D1D', # Font warna merah gelap agar terbaca jelas
-                size=10
+                color='#7F1D1D',       # Font merah gelap agar kontras
+                size=11
             ),
-            # Membuat kotak merah soft (background text) sebagai pembungkus label nasional
-            texttemplate='<span style="background-color: #FFE4E6; border: 1px solid #FECDD3; padding: 2px 4px; border-radius: 3px;">%{text:.1f}</span>',
+            textfont_backgroundcolor='#FFE4E6', # KOTAK MERH SOFT
+            textfont_bordercolor='#FECDD3',     # Garis tepi kotak
             line=dict(dash='dash', width=2.5, color='#DC2626', shape='spline'),
             marker=dict(size=8)
         ))
         
-        # 3. KONFIGURASI LAYOUT & FORMAT SUMBU Y (1 Angka Belakang Koma)
+        # 3. LAYOUT & FORMAT SUMBU Y (1 Angka Belakang Koma)
         fig.update_layout(
             xaxis=dict(
                 dtick=1, 
                 type='category'
             ), 
             yaxis=dict(
-                tickformat='.1f' # KUNCI PERBAIKAN: Memaksa nilai sumbu Y berformat 1 angka di belakang koma
+                tickformat='.1f' # Sumbu Y wajib 1 angka belakang koma
             ),
             xaxis_title="Tahun", 
             yaxis_title="Pertumbuhan Ekonomi (%)", 
-            margin={"r":10,"t":30,"l":10,"b":10}, 
+            margin={"r":10,"t":40,"l":10,"b":10}, # t dinaikkan ke 40 agar label teratas tidak terpotong
             legend_orientation="h"
         )
+        
+        # Memastikan label kotak tidak terpotong garis tepi grafik terluar
+        fig.update_traces(cliponaxis=False)
         
         st.plotly_chart(fig, use_container_width=True)
     except Exception:
