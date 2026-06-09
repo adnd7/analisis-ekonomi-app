@@ -387,24 +387,6 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-# Fungsi internal khusus untuk memformat ribuan dengan koma (PMA/PMDN) tanpa mengubah teks bawaan
-def format_ribuan(val):
-    if pd.isna(val) or val == "" or str(val).lower() == 'nan': 
-        return "-"
-    try:
-        return f"{float(val):,}"
-    except ValueError:
-        return str(val)
-
-# Fungsi internal khusus untuk Rasio Gini 3 angka belakang koma
-def format_gini(val):
-    if pd.isna(val) or val == "" or str(val).lower() == 'nan': 
-        return "-"
-    try:
-        return f"{float(val):.3f}"
-    except ValueError:
-        return str(val)
-
 col_ek1, col_ek2, col_ek3, col_ek4, col_ek5 = st.columns(5)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
