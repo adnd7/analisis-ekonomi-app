@@ -158,11 +158,11 @@ def buat_peta_klasifikasi(df_aktif):
             
         fig = px.choropleth_mapbox(
             df_peta, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                  
-            color_discrete_map={                
-                "Daerah Maju dan Cepat Tumbuh": "#0D415C",  
-                "Daerah Berkembang Cepat": "#13BA8E",       
-                "Daerah Maju tapi Tertekan": "#A7E048",    
-                "Daerah Relatif Tertinggal": "#D9DADB"      
+            color_discrete_map={              
+                "Daerah Maju dan Cepat Tumbuh": "#031926",  
+                "Daerah Berkembang Cepat": "#468189",       
+                "Daerah Maju tapi Tertekan": "#9DBEBB",    
+                "Daerah Relatif Tertinggal": "#F4E9CD"      
             },
             mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "Status Klasifikasi"}
         )
@@ -234,10 +234,10 @@ def buat_scatter_sektoral(df_aktif, jenis_analisis):
         judul_full = 'Scatter Plot "Shift Share 2015/2025"'
         help_teks = "Metode Shift Share digunakan untuk menguraikan pertumbuhan suatu sektor ke dalam komponen pengaruh pertumbuhan nasional, struktur ekonomi, dan daya saing daerah. Melalui metode ini, dapat diketahui apakah kinerja suatu sektor didorong oleh dinamika nasional atau oleh keunggulan kompetitif yang dimiliki daerah."
         kriteria_teks = (
-            "- **Kriteria I (RS + IM +):** Sektor Tumbuh Pesat $\\rightarrow$ Sektor utama.\n"
-            "- **Kriteria II (RS + IM -):** Sektor Berpotensi $\\rightarrow$ Potensi andalan baru.\n"
-            "- **Kriteria III (RS - IM +):** Sektor Berkembang $\\rightarrow$ Perlu dijaga agar tidak turun.\n"
-            "- **Kriteria IV (RS - IM -):** Sektor Tertinggal $\\rightarrow$ Memerlukan perhatian khusus."
+            "- **Kriteria I (RS + IM +):** Sektor Tumbuh Pesat $\\rightarrow$ sektor yang memiliki daya saing tinggi di tingkat lokal dan didukung oleh tren pertumbuhan nasional.\n"
+            "- **Kriteria II (RS + IM -):** Sektor Berpotensi $\\rightarrow$ sektor yang kuat secara lokal meskipun secara nasional cenderung melambat, sehingga berpotensi menjadi keunggulan spesifik daerah.\n"
+            "- **Kriteria III (RS - IM +):** Sektor Berkembang $\\rightarrow$ sektor yang tumbuh secara nasional namun belum diikuti oleh daya saing daerah, sehingga memerlukan penguatan kapasitas lokal.\n"
+            "- **Kriteria IV (RS - IM -):** Sektor Tertinggal $\\rightarrow$ sektor dengan daya saing dan pertumbuhan yang rendah baik di tingkat lokal maupun nasional."
         )
         col_x, col_y = "im_2025", "rs_2025"
         garis_x, garis_y = 0.0, 0.0  
@@ -247,10 +247,10 @@ def buat_scatter_sektoral(df_aktif, jenis_analisis):
         judul_full = 'Scatter Plot "Tipologi Klassen Rata-Rata 2022-2025"'
         help_teks = "Tipologi Klassen merupakan metode klasifikasi sektor berdasarkan tingkat pertumbuhan dan kontribusinya terhadap perekonomian daerah. Hasil analisisnya memberikan gambaran yang jelas mengenai posisi relatif setiap sektor, mulai dari sektor unggulan hingga sektor yang masih tertinggal, sehingga mendukung perumusan arah pembangunan ekonomi daerah."
         kriteria_teks = (
-            "- **Kriteria I (Pertumbuhan > Nas & Kontribusi > Nas):** Sektor Andalan $\\rightarrow$ Sektor utama.\n"
-            "- **Kriteria II (Pertumbuhan > Nas & Kontribusi < Nas):** Sektor Berkembang $\\rightarrow$ Potensi andalan baru.\n"
-            "- **Kriteria III (Pertumbuhan < Nas & Kontribusi > Nas):** Sektor Potensial $\\rightarrow$ Perlu dijaga agar tidak turun.\n"
-            "- **Kriteria IV (Pertumbuhan < Nas & Kontribusi < Nas):** Sektor Tertinggal $\\rightarrow$ Memerlukan perhatian khusus."
+            "- **Kriteria I (Pertumbuhan > Nasional dan Kontribusi > Nasional):** Sektor Andalan $\\rightarrow$ sektor dengan pertumbuhan dan kontribusi tinggi yang menjadi prioritas utama pembangunan ekonomi.\n"
+            "- **Kriteria II (Pertumbuhan > Nasional dan Kontribusi < Nasional):** Sektor Berkembang $\\rightarrow$ sektor dengan pertumbuhan tinggi namun kontribusi masih kecil, sehingga berpotensi menjadi andalan baru.\n"
+            "- **Kriteria III (Pertumbuhan < Nasional dan Kontribusi > Nasional):** Sektor Potensial $\\rightarrow$ sektor dengan kontribusi besar tetapi pertumbuhan melambat, sehingga perlu dijaga agar tidak menurun.\n"
+            "- **Kriteria IV (Pertumbuhan < Nasional dan Kontribusi < Nasional):** Sektor Tertinggal $\\rightarrow$ sektor dengan pertumbuhan dan kontribusi rendah yang memerlukan perhatian dan intervensi khusus."
         )
         col_x, col_y = "kontribusi_2025", "pertumbuhan_2025"
         garis_x, garis_y = 5.6, 5.1  
