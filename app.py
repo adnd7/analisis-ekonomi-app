@@ -24,19 +24,23 @@ def load_data_aman(provinsi, tahun):
         return pd.DataFrame(columns=['provinsi', 'tahun', 'klasifikasi', 'lpe_tw1', 'lpe_tw2', 'lpe_tw3', 'lpe_tw4', 'lpe_ctc'])
 
     try:
-        df_all = pd.read_csv(path_file, sep=";")
+        # Menggunakan sep=None & engine='python' agar Pandas otomatis mendeteksi apakah pemisah berupa koma atau titik koma
+        df_all = pd.read_csv(path_file, sep=None, engine='python')
         
-        # Penanganan jika baris header bergeser
+        # Penanganan jika baris header bergeser atau kolom pertama tidak bernama 'provinsi'
         if 'provinsi' not in df_all.columns:
             if 'Unnamed: 0' in df_all.columns:
                 df_all = df_all.rename(columns={'Unnamed: 0': 'provinsi'})
             else:
                 df_all.rename(columns={df_all.columns[0]: 'provinsi'}, inplace=True)
         
-        # Bersihkan spasi nama provinsi
+        # Bersihkan nama kolom dari spasi tidak kentara
+        df_all.columns = df_all.columns.str.strip()
+        
+        # Bersihkan spasi nama provinsi secara menyeluruh
         df_all['provinsi'] = df_all['provinsi'].astype(str).str.strip()
         
-        # Pastikan kolom tahun menjadi integer bulat
+        # Pastikan kolom tahun menjadi integer bulat tanpa kegagalan parsing
         df_all['tahun'] = pd.to_numeric(df_all['tahun'], errors='coerce').fillna(0).astype(int)
         
         # Paksa kolom-kolom indikator menjadi Angka murni (Float)
@@ -53,7 +57,7 @@ def load_data_aman(provinsi, tahun):
         # Saring berdasarkan tahun terpilih
         df_filtered = df_all[df_all['tahun'] == int(tahun)]
         
-        return df_filtered if not df_filtered.empty else pd.DataFrame(columns=df_all.columns)
+        return df_filtered.reset_index(drop=True) if not df_filtered.empty else pd.DataFrame(columns=df_all.columns)
             
     except Exception as e:
         print(f"❌ Error pada load_data_aman: {e}")
@@ -71,10 +75,11 @@ def load_data_sektoral_aman(provinsi):
         return pd.DataFrame()
 
     try:
-        df_sektoral = pd.read_csv(path_file, sep=";")
+        df_sektoral = pd.read_csv(path_file, sep=None, engine='python')
+        df_sektoral.columns = df_sektoral.columns.str.strip()
         df_sektoral['provinsi'] = df_sektoral['provinsi'].astype(str).str.strip()
         df_filtered = df_sektoral[df_sektoral['provinsi'] == str(provinsi).strip()]
-        return df_filtered if not df_filtered.empty else pd.DataFrame(columns=df_sektoral.columns)
+        return df_filtered.reset_index(drop=True) if not df_filtered.empty else pd.DataFrame(columns=df_sektoral.columns)
     except Exception as e:
         print(f"❌ Error Sektoral: {e}")
         return pd.DataFrame()
@@ -91,10 +96,11 @@ def load_data_struktur_aman(provinsi):
         return pd.DataFrame()
 
     try:
-        df_all = pd.read_csv(path_file, sep=";")
+        df_all = pd.read_csv(path_file, sep=None, engine='python')
+        df_all.columns = df_all.columns.str.strip()
         df_all['provinsi'] = df_all['provinsi'].astype(str).str.strip()
         df_filtered = df_all[df_all['provinsi'] == str(provinsi).strip()]
-        return df_filtered if not df_filtered.empty else pd.DataFrame(columns=df_all.columns)
+        return df_filtered.reset_index(drop=True) if not df_filtered.empty else pd.DataFrame(columns=df_all.columns)
     except Exception as e:
         print(f"❌ Error Struktur: {e}")
         return pd.DataFrame()
@@ -179,15 +185,26 @@ def buat_line_growth(df_aktif, provinsi):
     """
     URUTAN 2: Grafik Tren Pertumbuhan Ekonomi Wilayah Tren Tahunan.
     """
-    # Membaca file mentah untuk mengambil tren historis tahun-tahun sebelumnya
     try:
-        df_raw = pd.read_csv("data/data_ekonomi.csv")
-        df_prov = df_raw[df_raw['provinsi'].str.strip() == provinsi].sort_values(by="tahun")
+        if os.path.exists("data/data_ekonomi.csv"):
+            path_file = "data/data_ekonomi.csv"
+        else:
+            path_file = "data_ekonomi.csv"
+            
+        df_raw = pd.read_csv(path_file, sep=None, engine='python')
+        df_raw.columns = df_raw.columns.str.strip()
+        df_raw['provinsi'] = df_raw['provinsi'].astype(str).str.strip()
+        
+        df_prov = df_raw[df_raw['provinsi'] == provinsi].sort_values(by="tahun")
         
         if df_prov.empty:
             st.warning(f"Data tren historis untuk {provinsi} tidak ditemukan.")
             return
             
+        # Perbaikan tipe data untuk plotting tren yang presisi
+        df_prov['lpe_ctc'] = pd.to_numeric(df_prov['lpe_ctc'].astype(str).str.replace(',', '.', regex=False), errors='coerce')
+        df_prov['inflasi'] = pd.to_numeric(df_prov['inflasi'].astype(str).str.replace(',', '.', regex=False), errors='coerce')
+        
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_ctc'], name=f"{provinsi} (c-to-c)", mode='lines+markers', line=dict(width=3, color='#1D4ED8')))
         fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['inflasi'], name='Inflasi Wilayah', mode='lines+markers', line=dict(dash='dash', color='#DC2626')))
@@ -203,7 +220,6 @@ def buat_area_struktur(df_aktif):
     URUTAN 2: Grafik Struktur Ekonomi 17 Lapangan Usaha (Kunci Perbaikan: Huruf Kecil Kolom).
     """
     if not df_aktif.empty:
-        # KUNCI PERBAIKAN: Gunakan kolom 'tahun', 'kontribusi_sektor', 'sektor' sesuai CSV asli Anda
         df_display = df_aktif.sort_values(by="tahun")
         warna_map = get_warna_sektor_map(df_display['sektor'])
         
@@ -345,14 +361,10 @@ with col_tahun:
 
 st.markdown("---")
 
-# Perhatian: load_data_aman harus mengembalikan seluruh DataFrame tahun terkait 
-# agar bisa dipakai visualisasi bar chart makro 38 provinsi.
+# Memuat data secara aman menggunakan loader ter-update
 df_all_prov = load_data_aman(provinsi_terpilih, tahun_terpilih) 
 df_sektoral_aktif = load_data_sektoral_aman(provinsi_terpilih)
 df_struktur_aktif = load_data_struktur_aman(provinsi_terpilih)
-
-# if not df_all_prov.empty:
-#    df_all_prov['tahun'] = df_all_prov['tahun'].astype(int)
 
 # ==========================================
 # BAGIAN BARU: INDIKATOR PEMUATAN DATA (DATA FRAME TRACKER)
@@ -399,7 +411,6 @@ col_Grafik1, col_Grafik2 = st.columns(2)
 
 with col_Grafik1:
     st.subheader(f"Laju Pertumbuhan Ekonomi ({tahun_terpilih})")
-    # Mengirimkan seluruh dataframe agar barchart memuat 38 provinsi
     buat_bar_chart_makro(df_all_prov, "Pertumbuhan Ekonomi")
 
 with col_Grafik2:
