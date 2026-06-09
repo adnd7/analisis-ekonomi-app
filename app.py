@@ -354,6 +354,32 @@ df_struktur_aktif = load_data_struktur_aman(provinsi_terpilih)
 # if not df_all_prov.empty:
 #    df_all_prov['tahun'] = df_all_prov['tahun'].astype(int)
 
+# ==========================================
+# BAGIAN BARU: INDIKATOR PEMUATAN DATA (DATA FRAME TRACKER)
+# ==========================================
+st.markdown("#### 📊 Status Pemuatan Data Monitoring")
+status_makro, status_sektoral, status_struktur = st.columns(3)
+
+with status_makro:
+    if not df_all_prov.empty:
+        st.success(f"✓ Data Makro ({len(df_all_prov)} Baris Terload)")
+    else:
+        st.error("❌ Data Makro Kosong")
+
+with status_sektoral:
+    if not df_sektoral_aktif.empty:
+        st.success(f"✓ Data Sektoral ({len(df_sektoral_aktif)} Sektor Terload)")
+    else:
+        st.error("❌ Data Sektoral Kosong")
+
+with status_struktur:
+    if not df_struktur_aktif.empty:
+        st.success(f"✓ Data Struktur ({len(df_struktur_aktif)} Tren Terload)")
+    else:
+        st.error("❌ Data Struktur Kosong")
+
+st.markdown("---")
+
 # Ambil baris spesifik untuk Provinsi & Tahun terpilih demi keperluan pengisian Metric Box
 df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
 
@@ -439,7 +465,7 @@ with st.container():
         status_track = "On Track / Realistis untuk Dicapai" if capaian_realitas >= target_2026 else "Memerlukan Dukungan Percepatan / Upaya Ekstra"
         st.write(f"**Status Capaian:** {status_track}")
         
-        # Hindari pembagian dengan nol
+        # Avoid division by zero
         pembagi = max(target_2026, 0.1)
         st.progress(min(max(float(capaian_realitas / pembagi), 0.0), 1.0))
         
