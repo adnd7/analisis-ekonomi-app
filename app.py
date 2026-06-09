@@ -156,10 +156,10 @@ def buat_peta_klasifikasi(df_aktif):
             featureidkey="properties.PROVINSI", # Menghubungkan ke nama provinsi di GeoJSON
             color="klasifikasi",                  
             color_discrete_map={                
-                "Daerah Maju dan Cepat Tumbuh": "#0D415C",  
-                "Daerah Berkembang Cepat": "#13BA8E",       
-                "Daerah Maju tapi Tertekan": "#A7E048",    
-                "Daerah Relatif Tertinggal": "#D9DADB"      
+                "Daerah Maju dan Cepat Tumbuh": "#031926",  
+                "Daerah Berkembang Cepat": "#468189",       
+                "Daerah Maju tapi Tertekan": "#9DBEBB",    
+                "Daerah Relatif Tertinggal": "#F4E9CD"      
             },
             mapbox_style="carto-positron", 
             center={"lat": -2.5, "lon": 118.0}, 
