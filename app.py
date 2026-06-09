@@ -275,7 +275,7 @@ def buat_line_growth(provinsi):
         fig.add_trace(go.Scatter(
             x=df_prov['tahun'], 
             y=df_prov['lpe_nasional'], 
-            name='Nasional      *Catatan: Data tahun 2026 bersifat sementara (c-to-c)*', 
+            name='Nasional',      *Catatan: Data tahun 2026 bersifat sementara (c-to-c)*', 
             mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
             text=df_prov['lpe_nasional'].round(1), # Pembulatan data label 1 angka belakang koma
             textposition='top center',
@@ -455,7 +455,7 @@ st.markdown("***Catatan:*** *Klasifikasi menggunakan metode Tipologi Klassen den
 st.markdown("---")
 st.header(f"2. KINERJA INDIKATOR EKONOMI DAN SOSIAL {provinsi_terpilih.upper()}")
 
-st.markdown("#### Pertumbuhan Ekonomi (YoY)", help="Data tahun 2026 bersifat sangat sementara (c-to-c)")
+st.markdown("#### Pertumbuhan Ekonomi (YoY)")
 buat_line_growth(provinsi_terpilih)
 
 st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
