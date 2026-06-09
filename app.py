@@ -130,7 +130,15 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
         fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, color="kontribusi", color_continuous_scale="Cividis")
         # AKTIVASI LABEL: Menampilkan angka statistik 1 desimal di ujung luar bar grafik
         fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
-        
+
+    # --------------------------------------------------------------------------
+    # LOGIKA PEMBEDA DAERAH TERPILIH (MENGGUNAKAN PIN)
+    # --------------------------------------------------------------------------
+    # 1. Menambahkan penanda emoji pin "📍" dan teks tebal pada sumbu Y
+    df_sorted['label_provinsi'] = df_sorted['provinsi'].apply(
+        lambda x: f"<b>📍 {x} (Dipilih)</b>" if str(x).strip().lower() == str(provinsi_aktif).strip().lower() else x
+    )
+    
     fig.update_layout(height=750, margin={"r":40,"t":10,"l":10,"b":10})
     st.plotly_chart(fig, use_container_width=True)
 
@@ -359,7 +367,7 @@ capaian_ctc_str = format_val(capaian_ctc)
 with q5:
     st.markdown(
         f'<div style="background-color:#0A192F; color:white; padding:10px; border-radius:5px; text-align:center;">'
-        f'<p style="margin:0; font-size:17px;">Capaian c-to-c (%)</p>'
+        f'<p style="margin:0; font-size:15px;">Capaian c-to-c (%)</p>'
         f'<h3 style="margin:0; color:#00CC96;">{capaian_ctc_str}</h3>'
         f'</div>', unsafe_allow_html=True
     )
