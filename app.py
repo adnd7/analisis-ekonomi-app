@@ -337,8 +337,8 @@ with col_Grafik2:
     buat_bar_chart_makro(df_all_prov, "Kontribusi PDRB")
 
 st.subheader(f"🗺️ Sebaran Klasifikasi Wilayah")
-st.markdown("*Klasifikasi menggunakan metode Tipologi Klassen dengan mempertimbangkan rata-rata pertumbuhan ekonomi dan PDRB per Kapita Tahun 2022-2025*")
 buat_peta_klasifikasi(df_all_prov)
+st.markdown("*Klasifikasi menggunakan metode Tipologi Klassen dengan mempertimbangkan rata-rata pertumbuhan ekonomi dan PDRB per Kapita Tahun 2022-2025*")
 
 st.markdown("---")
 st.header(f"2. KINERJA INDIKATOR EKONOMI DAN SOSIAL {provinsi_terpilih.upper()}")
