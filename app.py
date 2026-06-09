@@ -456,8 +456,8 @@ st.markdown("---")
 st.header(f"2. KINERJA INDIKATOR EKONOMI DAN SOSIAL {provinsi_terpilih.upper()}")
 
 st.markdown("#### Pertumbuhan Ekonomi (YoY)")
+help_teks = "Data tahun 2026 bersifat sangat sementara (c-to-c)"
 buat_line_growth(provinsi_terpilih)
-st.markdown("***Catatan:*** *Data tahun 2026 bersifat sangat sementara (c-to-c)*")
 
 st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
 q1, q2, q3, q4, q5 = st.columns(5)
