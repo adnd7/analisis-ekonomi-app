@@ -252,11 +252,58 @@ def buat_line_growth(provinsi):
         df_prov['lpe_nasional'] = pd.to_numeric(df_prov['lpe_nasional'].astype(str).str.replace(',', '.', regex=False).str.strip().replace('-', np.nan), errors='coerce')
         
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_ctc'], name=f"{provinsi} (c-to-c)", mode='lines+markers', line=dict(width=3, color='#1D4ED8', shape='spline')))
-        # MENAMBAHKAN line_shape='spline' PADA LINE NASIONAL
-        fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_nasional'], name='Nasional (c-to-c)', mode='lines+markers', line=dict(dash='dash', color='#DC2626', shape='spline')))
         
-        fig.update_layout(xaxis=dict(dtick=1, type='category'), xaxis_title="Tahun", margin={"r":10,"t":30,"l":10,"b":10}, legend_orientation="h")
+        # 1. TRACE DAERAH (Warna Biru Utama, Label Kotak Biru Muda, 1 Angka Belakang Koma)
+        fig.add_trace(go.Scatter(
+            x=df_prov['tahun'], 
+            y=df_prov['lpe_ctc'], 
+            name=f"{provinsi} (c-to-c)", 
+            mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
+            text=df_prov['lpe_ctc'].round(1), # Pembulatan data label 1 angka belakang koma
+            textposition='top center',
+            textfont=dict(
+                color='#1E3A8A', # Font warna biru gelap agar terbaca jelas
+                size=10
+            ),
+            # Membuat kotak biru muda (background text) sebagai pembungkus label daerah
+            texttemplate='<span style="background-color: #E0F2FE; border: 1px solid #BAE6FD; padding: 2px 4px; border-radius: 3px;">%{text:.1f}</span>',
+            line=dict(width=3, color='#1D4ED8', shape='spline'),
+            marker=dict(size=8)
+        ))
+        
+        # 2. TRACE NASIONAL (Warna Merah Utama, Label Kotak Merah Soft, 1 Angka Belakang Koma)
+        fig.add_trace(go.Scatter(
+            x=df_prov['tahun'], 
+            y=df_prov['lpe_nasional'], 
+            name='Nasional (c-to-c)', 
+            mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
+            text=df_prov['lpe_nasional'].round(1), # Pembulatan data label 1 angka belakang koma
+            textposition='bottom center',
+            textfont=dict(
+                color='#7F1D1D', # Font warna merah gelap agar terbaca jelas
+                size=10
+            ),
+            # Membuat kotak merah soft (background text) sebagai pembungkus label nasional
+            texttemplate='<span style="background-color: #FFE4E6; border: 1px solid #FECDD3; padding: 2px 4px; border-radius: 3px;">%{text:.1f}</span>',
+            line=dict(dash='dash', width=2.5, color='#DC2626', shape='spline'),
+            marker=dict(size=8)
+        ))
+        
+        # 3. KONFIGURASI LAYOUT & FORMAT SUMBU Y (1 Angka Belakang Koma)
+        fig.update_layout(
+            xaxis=dict(
+                dtick=1, 
+                type='category'
+            ), 
+            yaxis=dict(
+                tickformat='.1f' # KUNCI PERBAIKAN: Memaksa nilai sumbu Y berformat 1 angka di belakang koma
+            ),
+            xaxis_title="Tahun", 
+            yaxis_title="Pertumbuhan Ekonomi (%)", 
+            margin={"r":10,"t":30,"l":10,"b":10}, 
+            legend_orientation="h"
+        )
+        
         st.plotly_chart(fig, use_container_width=True)
     except Exception:
         st.error("Gagal memuat tren pertumbuhan makro historis.")
