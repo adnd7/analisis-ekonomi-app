@@ -275,7 +275,7 @@ def buat_line_growth(provinsi):
         fig.add_trace(go.Scatter(
             x=df_prov['tahun'], 
             y=df_prov['lpe_nasional'], 
-            name='Nasional', 
+            name='Nasional      *Catatan: Data tahun 2026 bersifat sementara (c-to-c)*', 
             mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
             text=df_prov['lpe_nasional'].round(1), # Pembulatan data label 1 angka belakang koma
             textposition='top center',
