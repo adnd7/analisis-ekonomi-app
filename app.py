@@ -167,9 +167,11 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                     thickness=15,
                     len=0.6,
                     yanchor="middle",
-                    y=0.5
+                    y=0.5,
+                    # KUNCI PERBAIKAN: Menghapus garis tepi luar dan garis penanda skala warna
+                    outlinewidth=0,
+                    ticks=""
                 ),
-                # KUNCI PERBAIKAN: Set lebar garis jadi 0 dan warnanya transparan
                 line=dict(
                     width=0,
                     color='rgba(0,0,0,0)'
