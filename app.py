@@ -162,7 +162,6 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                 color=warna_kustom,
                 colorscale=skala_warna,
                 showscale=True,
-                # PERBAIKAN 1: Mengatur ukuran skala warna agar presisi dan pas (thickness & len)
                 colorbar=dict(
                     title=label_x,
                     thickness=15,
@@ -170,8 +169,11 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                     yanchor="middle",
                     y=0.5
                 ),
-                # PERBAIKAN 2: Memaksa garis tepi bar menjadi 0 agar tidak ada border kaku/jelek
-                line=dict(width=0)
+                # KUNCI PERBAIKAN: Set lebar garis jadi 0 dan warnanya transparan
+                line=dict(
+                    width=0,
+                    color='rgba(0,0,0,0)'
+                )
             ),
             text=df_sorted[kolom_nilai],
             texttemplate='%{text:.1f}',
@@ -185,7 +187,6 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                      color=kolom_nilai, color_continuous_scale=skala_warna)
         fig.update_traces(texttemplate='%{x:.1f}', textposition='outside')
         
-    # PERBAIKAN 3: Menghilangkan garis grid luar yang mengganggu layout dashboard
     fig.update_layout(
         height=750, 
         margin={"r":40,"t":10,"l":10,"b":10},
