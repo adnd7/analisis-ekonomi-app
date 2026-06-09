@@ -69,8 +69,15 @@ def load_data_aman(provinsi, tahun):
                 df_all[kol] = df_all[kol].str.replace(',', '.', regex=False)
                 df_all[kol] = pd.to_numeric(df_all[kol], errors='coerce')
         
-        df_filtered = df_all[df_all['tahun'] == int(tahun)]
-        return df_filtered.reset_index(drop=True) if not df_filtered.empty else pd.DataFrame(columns=df_all.columns)
+        # PERBAIKAN: Gunakan metode pencarian nama yang fleksibel terhadap huruf kapital/spasi
+        df_filtered = df_all[df_all['provinsi'].str.lower().str.strip() == str(provinsi).lower().strip()]
+        df_filtered = df_filtered[df_filtered['tahun'] == int(tahun)]
+        
+        # Jika tahun spesifik kosong, kembalikan dataframe tahun terkait milik semua provinsi agar bar chart nasional tidak patah
+        if df_filtered.empty:
+            return df_all[df_all['tahun'] == int(tahun)].reset_index(drop=True)
+            
+        return df_all[df_all['tahun'] == int(tahun)].reset_index(drop=True)
             
     except Exception as e:
         return pd.DataFrame(columns=['provinsi', 'tahun', 'klasifikasi', 'lpe_tw1', 'lpe_tw2', 'lpe_tw3', 'lpe_tw4', 'lpe_ctc'])
@@ -80,7 +87,7 @@ def load_data_sektoral_aman(provinsi):
     if df_sektoral is None or df_sektoral.empty: return pd.DataFrame()
     try:
         df_sektoral['provinsi'] = df_sektoral['provinsi'].astype(str).str.strip()
-        df_filtered = df_sektoral[df_sektoral['provinsi'] == str(provinsi).strip()]
+        df_filtered = df_sektoral[df_sektoral['provinsi'].str.lower().str.strip() == str(provinsi).lower().strip()]
         return df_filtered.reset_index(drop=True) if not df_filtered.empty else pd.DataFrame(columns=df_sektoral.columns)
     except:
         return pd.DataFrame()
@@ -90,7 +97,7 @@ def load_data_struktur_aman(provinsi):
     if df_all is None or df_all.empty: return pd.DataFrame()
     try:
         df_all['provinsi'] = df_all['provinsi'].astype(str).str.strip()
-        df_filtered = df_all[df_all['provinsi'] == str(provinsi).strip()]
+        df_filtered = df_all[df_all['provinsi'].str.lower().str.strip() == str(provinsi).lower().strip()]
         return df_filtered.reset_index(drop=True) if not df_filtered.empty else pd.DataFrame(columns=df_all.columns)
     except:
         return pd.DataFrame()
@@ -128,10 +135,6 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     st.plotly_chart(fig, use_container_width=True)
 
 def buat_peta_klasifikasi(df_aktif):
-    """
-    URUTAN 1: Visualisasi Peta Choropleth 38 Provinsi dengan Skema Warna KEMD resmi.
-    Menangani sinkronisasi nama DI Yogyakarta agar sinkron dengan standar GeoJSON.
-    """
     if df_aktif is None or df_aktif.empty or "klasifikasi" not in df_aktif.columns:
         st.warning("Data kosong atau kolom klasifikasi tidak ditemukan, peta tidak dapat dimuat.")
         return
@@ -144,32 +147,21 @@ def buat_peta_klasifikasi(df_aktif):
         with open(geojson_path, "r") as f:
             geojson_indonesia = json.load(f)
             
-        # SINKRONISASI PETA: Membuat salinan data khusus untuk peta agar data asli Excel tidak rusak
         df_peta = df_aktif.copy()
-        
-        # Mengubah nama "DI Yogyakarta" menjadi "DAERAH ISTIMEWA YOGYAKARTA" agar dibaca oleh GeoJSON
         df_peta['provinsi'] = df_peta['provinsi'].replace({
             "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
             "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta"
         })
             
         fig = px.choropleth_mapbox(
-            df_peta, # Gunakan dataframe tiruan yang sudah disinkronkan namanya
-            geojson=geojson_indonesia, 
-            locations="provinsi", 
-            featureidkey="properties.PROVINSI", # Menghubungkan ke nama provinsi di GeoJSON
-            color="klasifikasi",                  
+            df_peta, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                  
             color_discrete_map={                
                 "Daerah Maju dan Cepat Tumbuh": "#0D415C",  
                 "Daerah Berkembang Cepat": "#13BA8E",       
                 "Daerah Maju tapi Tertekan": "#A7E048",    
                 "Daerah Relatif Tertinggal": "#D9DADB"      
             },
-            mapbox_style="carto-positron", 
-            center={"lat": -2.5, "lon": 118.0}, 
-            zoom=3.5, 
-            opacity=0.8, 
-            labels={"klasifikasi": "Status Klasifikasi"}
+            mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "Status Klasifikasi"}
         )
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
         st.plotly_chart(fig, use_container_width=True)
@@ -181,7 +173,7 @@ def buat_line_growth(provinsi):
     if df_raw is None or df_raw.empty: return
     try:
         df_raw['provinsi'] = df_raw['provinsi'].astype(str).str.strip()
-        df_prov = df_raw[df_raw['provinsi'] == provinsi].sort_values(by="tahun")
+        df_prov = df_raw[df_raw['provinsi'].str.lower().str.strip() == provinsi.lower().strip()].sort_values(by="tahun")
         
         if df_prov.empty:
             st.warning(f"Data tren historis untuk {provinsi} tidak ditemukan.")
@@ -315,7 +307,8 @@ with status_struktur:
 
 st.markdown("---")
 
-df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
+# Pencarian baris data dioptimasi agar mengabaikan perbedaan spasi ujung teks di Excel
+df_row = df_all_prov[(df_all_prov['provinsi'].str.lower().str.strip() == provinsi_terpilih.lower().strip()) & (df_all_prov['tahun'] == int(tahun_terpilih))]
 df_active_dict = df_row.iloc[0].to_dict() if not df_row.empty else {}
 
 def format_val(val, unit=""):
@@ -383,12 +376,22 @@ st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 col_ek1, col_ek2, col_ek3, col_ek4, col_ek5 = st.columns(5)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_ek2: st.metric(label="Inflasi Tahunan (Persen)", value=format_val(df_active_dict.get('inflasi'), "%"))
+
+# ==========================================
+# PERBAIKAN STRUKTUR KOLOM: Mengganti st.metric dengan st.markdown & st.write agar teks wrap-down otomatis
+# ==========================================
 with col_ek3:
-    st.markdown("**Nilai Investasi:**")
-    st.write(f"• PMA: {format_val(df_active_dict.get('pma'))}")
-    st.write(f"• PMDN: {format_val(df_active_dict.get('pmdn'))}")
-with col_ek4: st.metric(label="Ekspor Terbesar", value=format_val(df_active_dict.get('ekspor_top3')))
-with col_ek5: st.metric(label="Tenaga Kerja Terbesar", value=format_val(df_active_dict.get('naker_top')))
+    st.markdown("<div style='font-size: 14px; font-weight: 500; color: #64748B;'>Nilai Investasi</div>", unsafe_allow_html=True)
+    st.write(f"• **PMA:** {format_val(df_active_dict.get('pma'))}")
+    st.write(f"• **PMDN:** {format_val(df_active_dict.get('pmdn'))}")
+with col_ek4: 
+    st.markdown("<div style='font-size: 14px; font-weight: 500; color: #64748B;'>Ekspor Terbesar</div>", unsafe_allow_html=True)
+    st.write(format_val(df_active_dict.get('ekspor_top3')))
+with col_ek5: 
+    st.markdown("<div style='font-size: 14px; font-weight: 500; color: #64748B;'>Tenaga Kerja Terbesar</div>", unsafe_allow_html=True)
+    st.write(format_val(df_active_dict.get('naker_top')))
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
 with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
@@ -397,7 +400,7 @@ with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('t
 with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 st.markdown("---")
-st.header(f"3. ANALISIS SECTOR UNGGULAN DAERAH {provinsi_terpilih.upper()}")
+st.header("3. ANALISIS SECTOR UNGGULAN DAERAH")
 buat_scatter_sektoral(df_sektoral_aktif, "Overlay")
 buat_scatter_sektoral(df_sektoral_aktif, "Shift Share")
 buat_scatter_sektoral(df_sektoral_aktif, "Tipologi Klassen")
