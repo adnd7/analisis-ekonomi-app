@@ -164,7 +164,7 @@ def buat_peta_klasifikasi(df_aktif):
                 "Daerah Maju tapi Tertekan": "#9DBEBB",    
                 "Daerah Relatif Tertinggal": "#F4E9CD"      
             },
-            mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": **"Status Klasifikasi"**}
+            mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "<b>Status Klasifikasi</b>"}
         )
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
         st.plotly_chart(fig, use_container_width=True)
