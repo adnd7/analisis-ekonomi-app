@@ -118,11 +118,11 @@ def buat_bar_chart_makro(df_aktif, tipe_chart):
     if tipe_chart == "Pertumbuhan Ekonomi":
         if "lpe_ctc" not in df_aktif.columns: return st.warning("Kolom lpe_ctc tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["lpe_ctc"]).sort_values(by="lpe_ctc", ascending=True)
-        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
+        fig = px.bar(df_sorted, x="lpe_ctc", y="provinsi", orientation='h', labels={"lpe_ctc": "LPE c-to-c (%)", "provinsi": "Provinsi"}, color="lpe_ctc", color_continuous_scale="Viridis")
     else:
         if "kontribusi" not in df_aktif.columns: return st.warning("Kolom kontribusi tidak ditemukan.")
         df_sorted = df_aktif.dropna(subset=["kontribusi"]).sort_values(by="kontribusi", ascending=True)
-        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', labels={"kontribusi": "Kontribusi PDRB (%)", "provinsi": "Provinsi"}, color="kontribusi", color_continuous_scale="Cividis")
+        fig = px.bar(df_sorted, x="kontribusi", y="provinsi", orientation='h', labels={"kontribusi": "Kontribusi PDRB (persen)", "provinsi": "Provinsi"}, color="kontribusi", color_continuous_scale="Cividis")
         
     fig.update_layout(height=600, margin={"r":10,"t":10,"l":10,"b":10})
     st.plotly_chart(fig, use_container_width=True)
@@ -202,7 +202,7 @@ def buat_area_struktur(df_aktif):
         
         fig = px.area(
             df_display, x="tahun", y="kontribusi_sektor", color="sektor", line_group="sektor", color_discrete_map=warna_map,
-            labels={"tahun": "Tahun Analisis", "kontribusi_sektor": "Kontribusi Sektor PDRB (%)"}
+            labels={"tahun": "Tahun Analisis", "kontribusi_sektor": "Kontribusi Sektor PDRB (persen)"}
         )
         fig.update_layout(showlegend=True, xaxis=dict(dtick=1, type='category'), margin={"r": 10, "t": 10, "l": 10, "b": 10})
         st.plotly_chart(fig, use_container_width=True)
@@ -251,7 +251,7 @@ def buat_scatter_sektoral(df_aktif, jenis_analisis):
         )
         col_x, col_y = "kontribusi_2025", "pertumbuhan_2025"
         garis_x, garis_y = 5.6, 5.1  
-        labels_x, labels_y = "Rata-Rata Kontribusi (%)", "Rata-Rata Pertumbuhan (%)"
+        labels_x, labels_y = "Rata-Rata Kontribusi (persen)", "Rata-Rata Pertumbuhan (persen)"
 
     if col_x not in df_aktif.columns or col_y not in df_aktif.columns:
         return st.warning(f"Kolom {col_x} atau {col_y} tidak ditemukan pada data sektoral.")
@@ -369,12 +369,12 @@ q3.metric("TW III YoY (%)", format_val(df_active_dict.get("lpe_tw3")))
 q4.metric("TW IV YoY (%)", format_val(df_active_dict.get("lpe_tw4")))
 
 capaian_ctc = df_active_dict.get("lpe_ctc", np.nan)
-capaian_ctc_str = format_val(capaian_ctc, "%")
+capaian_ctc_str = format_val(capaian_ctc)
 
 with q5:
     st.markdown(
         f'<div style="background-color:#0A192F; color:white; padding:10px; border-radius:5px; text-align:center;">'
-        f'<p style="margin:0; font-size:12px;">Capaian c-to-c</p>'
+        f'<p style="margin:0; font-size:12px;">Capaian c-to-c (%)</p>'
         f'<h3 style="margin:0; color:#00CC96;">{capaian_ctc_str}</h3>'
         f'</div>', unsafe_allow_html=True
     )
@@ -395,7 +395,7 @@ with st.container():
         
     with col_sim2:
         sisa_target = max((target_2026 * 4 - capaian_realitas) / 3, 0.0)
-        st.write(f"**Interpretasi Singkat:** Untuk mencapai target pertumbuhan sebesar {target_2026}%, laju pertumbuhan rata-rata pada Triwulan selanjutnya minimal harus didorong sebesar {sisa_target:.2f}%.")
+        st.write(f"**Interpretasi Singkat:** Untuk mencapai target pertumbuhan sebesar {target_2026} persen, laju pertumbuhan rata-rata pada Triwulan selanjutnya minimal harus didorong sebesar {sisa_target:.2f} persen.")
 
 st.markdown("#### Struktur Ekonomi Daerah")
 buat_area_struktur(df_struktur_aktif)
@@ -403,7 +403,7 @@ buat_area_struktur(df_struktur_aktif)
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 col_ek1, col_ek2, col_ek3, col_ek4, col_ek5 = st.columns(5)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
-with col_ek2: st.metric(label="Inflasi Tahunan (Persen)", value=format_val(df_active_dict.get('inflasi'), "%"))
+with col_ek2: st.metric(label="Inflasi Tahunan (Persen)", value=format_val(df_active_dict.get('inflasi')))
 with col_ek3:
     st.markdown("**Nilai Investasi:**")
     st.write(f"• PMA: {format_val(df_active_dict.get('pma'))}")
