@@ -275,7 +275,7 @@ def buat_line_growth(provinsi):
         fig.add_trace(go.Scatter(
             x=df_prov['tahun'], 
             y=df_prov['lpe_nasional'], 
-            name='Nasional      Catatan: Data tahun 2026 bersifat sementara (c-to-c)', 
+            name='Nasional          Catatan: Data tahun 2026 bersifat sementara (c-to-c)', 
             mode='lines+markers+text', # Ditambahkan '+text' untuk memunculkan label data
             text=df_prov['lpe_nasional'].round(1), # Pembulatan data label 1 angka belakang koma
             textposition='top center',
@@ -433,7 +433,8 @@ def format_val(val, unit=""):
         return "-"
     try:
         val_float = float(val)
-        return f"{val_float:.1f}{unit}"
+        # Menggunakan format ':, .1f' agar memiliki pemisah ribuan koma
+        return f"{val_float:,.1f}{unit}"
     except ValueError:
         return f"{val}{unit}"
 
@@ -462,8 +463,8 @@ st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
 q1, q2, q3, q4, q5 = st.columns(5)
 q1.metric("TW I YoY (%)", format_val(df_active_dict.get("lpe_tw1")))
 q2.metric("TW II YoY (%)", format_val(df_active_dict.get("lpe_tw2")))
-q3.metric("TW III YoY (%)", format_val(df_active_dict.get("lpe_tw3"), "%"))
-q4.metric("TW IV YoY (%)", format_val(df_active_dict.get("lpe_tw4"), "%"))
+q3.metric("TW III YoY (%)", format_val(df_active_dict.get("lpe_tw3")))
+q4.metric("TW IV YoY (%)", format_val(df_active_dict.get("lpe_tw4")))
 
 capaian_ctc = df_active_dict.get("lpe_ctc", np.nan)
 capaian_ctc_str = format_val(capaian_ctc)
@@ -492,7 +493,7 @@ with st.container():
         
     with col_sim2:
         sisa_target = max((target_2026 * 4 - capaian_realitas) / 3, 0.0)
-        st.write(f"**Interpretasi Singkat:** Untuk mencapai target pertumbuhan sebesar {target_2026} %, laju pertumbuhan rata-rata pada Triwulan selanjutnya minimal harus didorong sebesar {sisa_target:.2f} %.")
+        st.write(f"**Interpretasi Singkat:** Untuk mencapai target pertumbuhan sebesar {target_2026}%, laju pertumbuhan rata-rata pada Triwulan selanjutnya minimal harus didorong sebesar {sisa_target:.2f}%.")
 
 st.markdown("#### Struktur Ekonomi Daerah")
 buat_area_struktur(df_struktur_aktif)
@@ -502,10 +503,13 @@ st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 col_ek1, col_ek2, col_ek3, col_ek4, col_ek5 = st.columns(5)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
+
+# --- BAGIAN PERUBAHAN INVESTASI (DIPISAH MENJADI METRIC DAN BERIKAN FORMAT RIBUAN) ---
 with col_ek3:
-    st.markdown("**Nilai Investasi:**")
-    st.write(f"• PMA: {format_val(df_active_dict.get('pma'))}")
-    st.write(f"• PMDN: {format_val(df_active_dict.get('pmdn'))}")
+    st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
+    st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
+# ------------------------------------------------------------------------------------
+
 with col_ek4: st.metric(label="Ekspor Terbesar", value=format_val(df_active_dict.get('ekspor_top3')))
 with col_ek5: st.metric(label="Tenaga Kerja Terbesar", value=format_val(df_active_dict.get('naker_top')))
 
