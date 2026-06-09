@@ -186,7 +186,7 @@ def buat_line_growth(provinsi):
             return
             
         df_prov['lpe_ctc'] = pd.to_numeric(df_prov['lpe_ctc'].astype(str).str.replace(',', '.', regex=False).str.strip().replace('-', np.nan), errors='coerce')
-        df_prov['inflasi'] = pd.to_numeric(df_prov['inflasi'].astype(str).str.replace(',', '.', regex=False).str.strip().replace('-', np.nan), errors='coerce')
+        df_prov['lpe_nasional'] = pd.to_numeric(df_prov['lpe_nasional'].astype(str).str.replace(',', '.', regex=False).str.strip().replace('-', np.nan), errors='coerce')
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df_prov['tahun'], y=df_prov['lpe_ctc'], name=f"{provinsi} (c-to-c)", mode='lines+markers', line=dict(width=3, color='#1D4ED8')))
