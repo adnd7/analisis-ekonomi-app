@@ -2,196 +2,204 @@
 
 import streamlit as st
 import pandas as pd
-from modules.data_loader import load_all_economic_data, DAFTAR_PROVINSI_URUT, DAFTAR_SEKTOR_BPS
-from modules.analisis_sektoral import generate_klassen_chart
-from modules.simulasi import hitung_target_triwulan
-from modules.ai_engine import generate_executive_narrative, generate_ai_policy_matrix
+import plotly.express as px
 
-# 1. INITIALIZE SETTINGS & EXECUTIVE NAVY THEME
-st.set_page_config(
-    page_title="Dashboard Analisis Ekonomi Daerah - Perencanaan Bappenas",
-    page_icon="🏛️",
-    layout="wide"
+# Menggunakan data loader aman dari modules
+from modules.data_loader import load_data_aman, load_data_sektoral_aman, load_data_struktur_aman
+
+# Impor fungsi visualisasi dari modules/analisis_sektoral.py
+from modules.analisis_sektoral import (
+    buat_bar_chart_makro, buat_peta_klasifikasi, 
+    buat_line_growth, buat_area_struktur, buat_scatter_sektoral
 )
 
-# Custom Styling CSS untuk Tampilan Clean, Rounded Cards, dan Font Profesional Komparabel Dashboard Menteri
-st.markdown("""
-    <style>
-    .main { background-color: #F4F6F9; }
-    div[data-testid="stMetricValue"] { font-size: 30px; font-weight: 700; color: #0A192F; }
-    div[data-testid="stMetricDelta"] { font-size: 13px; font-weight: 500; }
-    h1, h2, h3, h4 { color: #0A192F; font-family: 'Segoe UI', Arial, sans-serif; }
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #E2E8F0;
-        border-radius: 6px 6px 0px 0px;
-        padding: 12px 24px;
-        color: #4A5568;
-        font-weight: 600;
-    }
-    .stTabs [aria-selected="true"] { 
-        background-color: #0A192F !important; 
-        color: #FFFFFF !important;
-    }
-    </style>
-""", unsafe_html=True)
+# Pengaturan Dasar Halaman Eksekutif
+st.set_page_config(page_title="Ekonomi Makro Daerah", layout="wide")
 
-# LOAD COMPREHENSIVE DATA ENGINE
-df_master = load_all_economic_data()
+# Title Dashboard Utama
+st.title("🏛️ Dashboard Ekonomi Makro Daerah")
+st.markdown("---")
 
-# ==========================================
-# HEADER UTAMA DASHBOARD
-# ==========================================
-st.markdown("""
-<div style="background-color:#0A192F; padding:20px; border-radius:10px; margin-bottom:25px; display:flex; align-items:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <div style="margin-right:25px;"><span style="font-size:45px;">🏛️</span></div>
-    <div>
-        <h1 style="color:#FFFFFF; margin:0; font-size:26px; font-weight:700; letter-spacing:0.5px;">DASHBOARD ANALISIS EKONOMI DAN SEKTOR UNGGULAN DAERAH BERBASIS AI</h1>
-        <p style="color:#CBD5E1; margin:6px 0 0 0; font-size:14px; font-weight:400;">Kementerian Perencanaan Pembangunan Nasional / Bappenas — Alat Bantu Pengambilan Kebijakan Strategis Makro Sektoral</p>
-    </div>
-</div>
-""", unsafe_html=True)
+# Pilihan Filter Diletakkan di Atas (Bukan di Sidebar)
+st.markdown("#### Pilihan Filter Analisis")
+col_provinsi, col_tahun = st.columns(2)
 
-# ==========================================
-# SIDEBAR FILTER INTERAKTIF
-# ==========================================
-st.sidebar.markdown("### 🔍 Parameter Perencanaan")
-provinsi_pilihan = st.sidebar.selectbox("Pilih Wilayah / Provinsi:", options=DAFTAR_PROVINSI_URUT)
-tahun_pilihan = st.sidebar.selectbox("Pilih Tahun Dokumen:", options=[2025, 2024, 2023])
-sektor_pilihan = st.sidebar.selectbox("Fokus Analisis Komoditas:", options=DAFTAR_SEKTOR_BPS)
+with col_provinsi:
+    # Daftar Nama 38 Provinsi Asli Indonesia Secara Urut dan Presisi
+    list_provinsi = [
+        "Aceh", "Sumatera Utara", "Sumatera Barat", "Riau", "Jambi", 
+        "Sumatera Selatan", "Bengkulu", "Lampung", "Kepulauan Bangka Belitung", 
+        "Kepulauan Riau", "DKI Jakarta", "Jawa Barat", "Jawa Tengah", 
+        "DI Yogyakarta", "Jawa Timur", "Banten", "Bali", "Nusa Tenggara Barat", 
+        "Nusa Tenggara Timur", "Kalimantan Barat", "Kalimantan Tengah", 
+        "Kalimantan Selatan", "Kalimantan Timur", "Kalimantan Utara", 
+        "Sulawesi Utara", "Sulawesi Tengah", "Sulawesi Selatan", 
+        "Sulawesi Tenggara", "Gorontalo", "Sulawesi Barat", "Maluku", 
+        "Maluku Utara", "Papua Barat", "Papua Barat Daya", "Papua", 
+        "Papua Selatan", "Papua Tengah", "Papua Pegunungan"
+    ]
+    provinsi_terpilih = st.selectbox("Pilih Wilayah Analisis:", list_provinsi)
 
-st.sidebar.divider()
-st.sidebar.markdown("### 📈 target Laju Pertumbuhan (Full-Year)")
-target_slider = st.sidebar.slider("Target Pertumbuhan RKP/RPJMD (%):", 3.5, 15.0, 5.2, step=0.1)
-q1_aktual_input = st.sidebar.number_input("Realisasi Triwulan I (Q1) Eksisting (%):", min_value=0.5, max_value=15.0, value=4.5, step=0.1)
+with col_tahun:
+    tahun_terpilih = st.selectbox("Tahun Analisis:", list(range(2011, 2026)), index=14) # Default ke 2025 sesuai data sektoral
 
-# FILTERING DATA PROSES
-df_filtered_makro = df_master[(df_master['Provinsi'] == provinsi_pilihan) & (df_master['Tahun'] == tahun_pilihan)]
-row_makro = df_filtered_makro.iloc[0] # Ambil baris pertama sebagai representasi indikator makro wilayah
+st.markdown("---")
+
+# Perhatian: load_data_aman harus mengembalikan seluruh DataFrame tahun terkait 
+# agar bisa dipakai visualisasi bar chart makro 38 provinsi.
+df_all_prov = load_data_aman(provinsi_terpilih, tahun_terpilih) 
+df_sektoral_aktif = load_data_sektoral_aman(provinsi_terpilih)
+df_struktur_aktif = load_data_struktur_aman(provinsi_terpilih)
+
+# if not df_all_prov.empty:
+#    df_all_prov['tahun'] = df_all_prov['tahun'].astype(int)
+
+# Ambil baris spesifik untuk Provinsi & Tahun terpilih demi keperluan pengisian Metric Box
+df_row = df_all_prov[(df_all_prov['provinsi'] == provinsi_terpilih) & (df_all_prov['tahun'] == int(tahun_terpilih))]
+
+# Jika data baris ditemukan, ubah menjadi tipe Series/Dictionary
+if not df_row.empty:
+    df_active_dict = df_row.iloc[0].to_dict()
+else:
+    df_active_dict = {}
 
 # ==========================================
-# LAYOUT KONTEN UTAMA VIA TABS INTERAKTIF
+# URUTAN 1: KONDISI EKONOMI MAKRO DAERAH 38 PROVINSI
 # ==========================================
-tab_makro, tab_sektoral, tab_simulasi, tab_ai = st.tabs([
-    "📊 PANEL INDIKATOR MAKRO & SOSIAL", 
-    "🎯 PANEL ANALISIS SEKTORAL KLASSEN", 
-    "🔄 PANEL SIMULASI RUN-RATE", 
-    "🤖 INTERPRETASI & REKOMENDASI AI"
-])
+st.header("KONDISI EKONOMI MAKRO DAERAH 38 PROVINSI")
 
-# ------------------------------------------
-# TAB 1: INDIKATOR MAKRO & SOSIAL
-# ------------------------------------------
-with tab_makro:
-    st.markdown(f"### Kinerja Indikator Makro & Sosial Provinsi {provinsi_pilihan} (Tahun {tahun_pilihan})")
-    
-    # PANEL MAKRO EKONOMI
-    st.markdown("#### A. Koridor Indikator Makroekonomi")
-    c_m1, c_m2, c_m3, c_m4, c_m5 = st.columns(5)
-    c_m1.metric("Pertumbuhan Ekonomi", f"{row_makro['Pertumbuhan_Ekonomi']}%", delta="+0.21% YoY", delta_color="normal")
-    c_m2.metric("PDRB Per Kapita", f"Rp {row_makro['PDRB_Per_Kapita']} Jt", delta="+Rp 1.8 Jt")
-    c_m3.metric("Tingkat Inflasi", f"{row_makro['Inflasi']}%", delta="-0.3% MoM", delta_color="inverse")
-    c_m4.metric("Investasi Daerah", f"Rp {row_makro['Investasi']} T", delta="+8.4% yoy")
-    c_m5.metric("Ekspor Daerah", f"US$ {row_makro['Ekspor']} M", delta="+2.5% yoy")
-    
-    st.write("")
-    
-    # PANEL SOSIAL & KESEJAHTERAAN
-    st.markdown("#### B. Koridor Indikator Kesejahteraan Sosial")
-    c_s1, c_s2, c_s3, c_s4 = st.columns(4)
-    c_s1.metric("Indeks Pembangunan Manusia", f"{row_makro['IPM']}", delta="Kategori Tinggi")
-    c_s2.metric("Tingkat Kemiskinan", f"{row_makro['Kemiskinan']}%", delta="-0.42% Membaik", delta_color="inverse")
-    c_s3.metric("Pengangguran Terbuka (TPT)", f"{row_makro['TPT']}%", delta="+0.11% Memburuk", delta_color="normal")
-    c_s4.metric("Gini Ratio Daerah", f"{row_makro['Gini_Ratio']}", delta="-0.002 Kontraksi", delta_color="inverse")
+# 1. Baris Pertama: Dibagi menjadi 2 Kolom untuk Grafik Batang 38 Provinsi
+col_Grafik1, col_Grafik2 = st.columns(2)
 
-# ------------------------------------------
-# TAB 2: ANALISIS SEKTORAL
-# ------------------------------------------
-with tab_sektoral:
-    st.markdown(f"### Pemetaan Struktur 17 Lapangan Usaha BPS di {provinsi_pilihan}")
-    
-    col_chart_box, col_table_box = st.columns([3, 2])
-    
-    with col_chart_box:
-        # Panggil fungsi grafik eksekutif dari modul sektoral
-        chart_fig = generate_klassen_chart(df_filtered_makro, provinsi_pilihan)
-        st.plotly_chart(chart_fig, use_container_width=True)
-        
-    with col_table_box:
-        st.markdown("##### 🏆 Sektor Komoditas Unggulan Utama (Kuadran I)")
-        df_q1 = df_filtered_makro[df_filtered_makro['Kuadran'] == "Kuadran I"].sort_values(by="LQ", ascending=False)
-        st.dataframe(
-            df_q1[['Lapangan_Usaha', 'LQ', 'Shift_Share_D', 'Kontribusi_PDRB']], 
-            hide_index=True, 
-            use_container_width=True
-        )
-        
-        with st.expander("🔍 Lihat Detail Ringkasan Sektor Tertekan / Tertinggal (Kuadran IV)"):
-            df_q4 = df_filtered_makro[df_filtered_makro['Kuadran'] == "Kuadran IV"].sort_values(by="LQ")
-            st.table(df_q4[['Lapangan_Usaha', 'LQ', 'Kontribusi_PDRB']])
+with col_Grafik1:
+    st.subheader(f"Laju Pertumbuhan Ekonomi ({tahun_terpilih})")
+    # Mengirimkan seluruh dataframe agar barchart memuat 38 provinsi
+    buat_bar_chart_makro(df_all_prov, "Pertumbuhan Ekonomi")
 
-# ------------------------------------------
-# TAB 3: SIMULASI TARGET PERTUMBUHAN
-# ------------------------------------------
-with tab_simulasi:
-    st.markdown("### 🔄 Analisis Run-Rate dan Simulasi Pencapaian Target Pertumbuhan Ekonomi")
-    st.write("Simulasi otomatis untuk menentukan target spasial pendorong sisa triwulan (Q2, Q3, Q4) agar deviasi rencana tahunan tidak meleset.")
+with col_Grafik2:
+    st.subheader(f"Kontribusi PDRB terhadap Nasional ({tahun_terpilih})")
+    buat_bar_chart_makro(df_all_prov, "Kontribusi PDRB")
+
+# 2. Baris Kedua: Peta Sebaran Wilayah dibuat Melebar Penuh (Wide)
+st.subheader(f"🗺️ Sebaran Klasifikasi Wilayah")
+buat_peta_klasifikasi(df_all_prov)
+
+st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("---")
+
+# ==========================================
+# URUTAN 2: KINERJA INDIKATOR EKONOMI DAN SOSIAL
+# ==========================================
+st.header(f"KINERJA INDIKATOR EKONOMI DAN SOSIAL {provinsi_terpilih.upper()}")
+
+# 1. Pertumbuhan Ekonomi YoY
+st.markdown("#### Pertumbuhan Ekonomi (YoY)")
+buat_line_growth(df_all_prov, provinsi_terpilih)
+
+# 5 Kotak capaian kuartal (Kuartal terakhir c-to-c warna gelap)
+st.write(f"**Capaian Laju Pertumbuhan Ekonomi Makro Daerah**")
+q1, q2, q3, q4, q5 = st.columns(5)
+q1.metric("TW I YoY", df_active_dict.get("lpe_tw1", "-"))
+q2.metric("TW II YoY", df_active_dict.get("lpe_tw2", "-"))
+q3.metric("TW III YoY", df_active_dict.get("lpe_tw3", "-"))
+q4.metric("TW IV YoY", df_active_dict.get("lpe_tw4", "-"))
+
+capaian_ctc = df_active_dict.get("lpe_ctc", "-")
+
+# Kotak c-to-c dibuat kontras dengan wadah khusus
+with q5:
+    st.markdown(
+        f'<div style="background-color:#0A192F; color:white; padding:10px; border-radius:5px; text-align:center;">'
+        f'<p style="margin:0; font-size:12px;">Capaian c-to-c</p>'
+        f'<h3 style="margin:0; color:#00CC96;">{capaian_ctc}%</h3>'
+        f'</div>', 
+        unsafe_allow_html=True
+    )
+
+# Box Simulasi Target Pertumbuhan (Warna latar belakang khusus)
+st.markdown("<br>", unsafe_allow_html=True)
+with st.container():
+    st.markdown(
+        '<div style="background-color:#1E293B; padding:5px; border-radius:10px;">'
+        '<h4 style="color:#F8FAFC; margin-top:0; padding-left:10px;">Simulasi Pencapaian Target Pertumbuhan Ekonomi Tahun 2026</h4>'
+        '</div>', 
+        unsafe_allow_html=True
+    )
     
-    target_q_sisa, status_teks, alert_tipe = hitung_target_triwulan(target_slider, q1_aktual_input)
-    
-    if alert_tipe == "error":
-        st.error(f"🚨 Konsekuensi Perencanaan: **{status_teks}**")
-    elif alert_tipe == "warning":
-        st.warning(f"⚠️ Konsekuensi Perencanaan: **{status_teks}**")
-    else:
-        st.success(f"✅ Konsekuensi Perencanaan: **{status_teks}**")
-        
     col_sim1, col_sim2 = st.columns(2)
     with col_sim1:
-        st.markdown("##### ⚙️ Kebutuhan Laju Kuartalan:")
-        st.write(f"* Target Pertumbuhan *Full Year* Akhir: **{target_slider}%**")
-        st.write(f"* Realisasi Capaian Kuartal I (Q1): **{q1_aktual_input}%**")
-        st.markdown(f"Untuk mengamankan target tahunan **{target_slider}%**, sisa laju pertumbuhan rata-rata pada **Triwulan II, III, dan IV** tidak boleh kurang dari **{target_q_sisa}%**.")
+        target_2026 = st.number_input("**Target Pertumbuhan Ekonomi (Persen):**", value=5.0, step=0.1)
+        
+        try:
+            capaian_realitas = float(capaian_ctc) if capaian_ctc != "-" else 0.0
+        except ValueError:
+            capaian_realitas = 0.0
+            
+        # Logika bar status capaian ke kanan
+        status_track = "On Track / Realistis untuk Dicapai" if capaian_realitas >= target_2026 else "Memerlukan Dukungan Percepatan / Upaya Ekstra"
+        st.write(f"**Status Capaian:** {status_track}")
+        
+        # Hindari pembagian dengan nol
+        pembagi = max(target_2026, 0.1)
+        st.progress(min(max(float(capaian_realitas / pembagi), 0.0), 1.0))
         
     with col_sim2:
-        st.markdown("##### 📊 Progres Capaian Terhadap Target Tahunan:")
-        persen_progres = min(max(float(q1_aktual_input / target_slider), 0.0), 1.0)
-        st.progress(persen_progres)
-        st.caption(f"Tingkat Pemenuhan Target Rencana Tahunan: {round(persen_progres * 100, 2)}%")
+        # Interpretasi rumus dinamis kuartal selanjutnya
+        sisa_target = max((target_2026 * 4 - capaian_realitas) / 3, 0.0)
+        st.write(f"**Interpretasi Singkat:** Untuk mencapai target pertumbuhan sebesar {target_2026}%, laju pertumbuhan rata-rata pada Triwulan selanjutnya minimal harus didorong sebesar {sisa_target:.2f}%.")
 
-# ------------------------------------------
-# TAB 4: INTERPRETASI & REKOMENDASI AI
-# ------------------------------------------
-with tab_ai:
-    st.markdown("### 🤖 Analisis Kebijakan Cerdas Berbasis Sistem Pakar Perencanaan")
-    
-    # 1. Jalankan narasi otomatis eksekutif
-    laporan_teks = generate_executive_narrative(row_makro, df_filtered_makro)
-    st.markdown(laporan_teks)
-    
-    st.divider()
-    
-    # 2. Tombol Aksi Generator Rekomendasi Kebijakan
-    st.markdown("#### 💡 Formulasi Matriks Rekomendasi Kebijakan AI")
-    st.write("Tekan tombol di bawah ini untuk menurunkan keputusan taktis lintas sektoral berdasarkan data di atas:")
-    
-    if st.button("🚀 Rumuskan Rekomendasi Kebijakan"):
-        with st.spinner("Sistem sedang mengalkulasi data makro-sosial ke dalam matriks perencanaan strategis..."):
-            matriks_opsi = generate_ai_policy_matrix(row_makro)
-            
-            st.success("Matriks Kebijakan Strategis Berhasil Disusun!")
-            
-            col_rec1, col_rec2 = st.columns(2)
-            with col_rec1:
-                st.markdown("##### 🏛️ Sektor Fiskal & Penganggaran APBD")
-                st.info(matriks_opsi['fiskal'])
-                
-                st.markdown("##### 💼 Hilirisasi Sektoral & Stimulus Investasi")
-                st.info(matriks_opsi['sektoral'])
-                
-            with rec_col2 if 'rec_col2' in locals() else col_rec2:
-                st.markdown("##### 👥 Program Penanggulangan Kemiskinan & Sosial")
-                st.warning(matriks_opsi['sosial'])
-                
-                st.markdown("##### 🛒 Pengendalian Inflasi Sektor Pangan (TPID)")
-                st.success(matriks_opsi['inflasi'])
+# 2. Struktur Ekonomi Daerah (Area Chart)
+st.markdown("#### Struktur Ekonomi Daerah")
+buat_area_struktur(df_struktur_aktif)
+
+# 3. Indikator Ekonomi dan Sosial Lainnya
+st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
+
+col_ek1, col_ek2, col_ek3, col_ek4, col_ek5 = st.columns(5)
+with col_ek1:
+    st.metric(label="PDRB Perkapita (Juta Rp)", value=df_active_dict.get('pdrb_perkapita', '-'))
+with col_ek2:
+    st.metric(label="Tingkat Inflasi Tahunan (Persen)", value=df_active_dict.get('inflasi', '-'))
+with col_ek3:
+    with st.container():
+        st.markdown("**Nilai Investasi:**")
+        st.write(f"• PMA (Juta USD): {df_active_dict.get('pma', '-')}")
+        st.write(f"• PMDN (Miliar Rp): {df_active_dict.get('pmdn', '-')}")
+with col_ek4:
+    st.metric(label="Komoditas Ekspor Terbesar", value=df_active_dict.get('ekspor_top3', '-'))
+with col_ek5:
+    st.metric(label="Tenaga Kerja Terbesar", value=df_active_dict.get('naker_top', '-'))
+
+# 4 Kotak indikator sosial
+col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
+with col_sos1:
+    st.metric(label="Indeks Pembangunan Manusia - IPM", value=df_active_dict.get('ipm', '-'))
+with col_sos2:
+    st.metric(label="Tingkat Kemiskinan (%)", value=df_active_dict.get('kemiskinan', '-'))
+with col_sos3:
+    st.metric(label="Tingkat Pengangguran Terbuka (TPT) (%)", value=df_active_dict.get('tpt', '-'))
+with col_sos4:
+    st.metric(label="Rasio Gini", value=df_active_dict.get('gini', '-'))
+
+st.markdown("---")
+
+# ==========================================
+# URUTAN 3: ANALISIS SEKTOR UNGGULAN DAERAH
+# ==========================================
+st.header(f"ANALISIS SEKTOR UNGGULAN DAERAH {provinsi_terpilih.upper()}")
+buat_scatter_sektoral(df_sektoral_aktif, "Overlay")
+buat_scatter_sektoral(df_sektoral_aktif, "Shift Share")
+buat_scatter_sektoral(df_sektoral_aktif, "Tipologi Klassen")
+
+st.markdown("---")
+
+# ==========================================
+# URUTAN 4: INTERPRETASI DAN REKOMENDASI
+# ==========================================
+st.header("INTERPRETASI DAN REKOMENDASI")
+
+st.markdown("### Interpretasi Sisi Ekonomi")
+st.info(df_active_dict.get("interpretasi_ekonomi_riil", "-"))
+
+st.markdown("### Rekomendasi Sisi Ekonomi")
+st.success(df_active_dict.get("rekomendasi_ekonomi_riil", "-"))
