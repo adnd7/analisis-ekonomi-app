@@ -338,7 +338,7 @@ with col_Grafik2:
 
 st.subheader(f"🗺️ Sebaran Klasifikasi Wilayah")
 buat_peta_klasifikasi(df_all_prov)
-st.markdown("**Catatan**, *Klasifikasi menggunakan metode Tipologi Klassen dengan mempertimbangkan rata-rata pertumbuhan ekonomi dan PDRB per Kapita Tahun 2022-2025*")
+st.markdown("***Catatan:*** *Klasifikasi menggunakan metode Tipologi Klassen dengan mempertimbangkan rata-rata pertumbuhan ekonomi dan PDRB per Kapita Tahun 2022-2025*")
 
 st.markdown("---")
 st.header(f"2. KINERJA INDIKATOR EKONOMI DAN SOSIAL {provinsi_terpilih.upper()}")
