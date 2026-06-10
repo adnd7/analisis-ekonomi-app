@@ -197,7 +197,7 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-def buat_peta_klasifikasi(df_aktif, provinsi_aktif=None):
+def buat_peta_klasifikasi(df_aktif):
     if df_aktif is None or df_aktif.empty or "klasifikasi" not in df_aktif.columns:
         st.warning("Data kosong atau kolom klasifikasi tidak ditemukan, peta tidak dapat dimuat.")
         return
@@ -210,14 +210,15 @@ def buat_peta_klasifikasi(df_aktif, provinsi_aktif=None):
         with open(geojson_path, "r") as f:
             geojson_indonesia = json.load(f)
             
+        # SINKRONISASI PETA: Membuat salinan data khusus untuk peta agar data asli Excel tidak rusak
         df_peta = df_aktif.copy()
         
+        # Mengubah nama "DI Yogyakarta" menjadi "Daerah Istimewa Yogyakarta" agar dibaca oleh GeoJSON
         df_peta['provinsi'] = df_peta['provinsi'].replace({
             "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
             "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta"
         })
             
-        # Grafik Utama Peta (Choropleth)
         fig = px.choropleth_mapbox(
             df_peta, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                  
             color_discrete_map={              
@@ -228,46 +229,6 @@ def buat_peta_klasifikasi(df_aktif, provinsi_aktif=None):
             },
             mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "<b>Status Klasifikasi</b>"}
         )
-
-        # ----------------------------------------------------------------------
-        # LOGIKA MENAMBAHKAN ICON PIN DI PROVINSI TERPILIH
-        # ----------------------------------------------------------------------
-        if provinsi_aktif:
-            # Standarisasi nama untuk pencarian koordinat di GeoJSON
-            nama_cari = "Daerah Istimewa Yogyakarta" if provinsi_aktif in ["DI Yogyakarta", "D.I. Yogyakarta"] else provinsi_aktif
-            
-            # Mencari koordinat tengah (centroid) provinsi terpilih dari file GeoJSON secara dinamis
-            lat_center, lon_center = None, None
-            for feature in geojson_indonesia['features']:
-                if feature['properties']['PROVINSI'].strip().lower() == nama_cari.strip().lower():
-                    # Mengambil sampel koordinat dari geometri GeoJSON
-                    coords = feature['geometry']['coordinates']
-                    # Penanganan jika tipe koordinat berupa MultiPolygon atau Polygon biasa
-                    if feature['geometry']['type'] == 'MultiPolygon':
-                        sample_point = coords[0][0][0]
-                    else:
-                        sample_point = coords[0][0]
-                    lon_center, lat_center = sample_point[0], sample_point[1]
-                    break
-            
-            # Jika koordinat provinsi ditemukan, tempelkan objek penanda (Pin) di atas layer peta
-            if lat_center is not None and lon_center is not None:
-                fig.add_trace(go.Scattermapbox(
-                    lat=[lat_center],
-                    lon=[lon_center],
-                    mode='markers+text',
-                    marker=dict(
-                        size=35, 
-                        color='rgba(0,0,0,0)', # Membuat marker bulatan aslinya transparan
-                    ),
-                    text=["📍"], # Menggunakan emoji pin sebagai pengganti text marker
-                    textposition="top center",
-                    textfont=dict(size=24), # Mengatur ukuran pin agar terlihat proporsional
-                    showlegend=False,
-                    hoverinfo='none' # Mencegah pop-up data ganda saat pin di-hover
-                ))
-        # ----------------------------------------------------------------------
-
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
         st.plotly_chart(fig, use_container_width=True)
     except Exception as e:
