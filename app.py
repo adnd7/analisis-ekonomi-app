@@ -500,16 +500,22 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-# Tambahkan custom CSS untuk memaksa teks nilai st.metric turun ke bawah & mengecil jika panjang
+# KUNCI PERBAIKAN: CSS yang lebih spesifik untuk menembus proteksi komponen Streamlit
 st.markdown(
     """
     <style>
-    /* Menargetkan teks nilai (value) dari st.metric */
-    div[data-testid="stMetricValue"] {
-        font-size: calc(1.2rem + 0.6vw) !important; /* Ukuran font dinamis agar mengecil di layar kecil */
+    /* Menargetkan pembungkus utama teks metrik */
+    [data-testid="stMetricValue"] > div {
+        font-size: 16px !important;                /* Memaksa ukuran tulisan menjadi kecil (16px) */
         white-space: normal !important;            /* Memperbolehkan teks turun ke bawah */
-        word-break: break-word !important;         /* Memotong kata yang terlalu panjang jika perlu */
-        line-height: 1.2 !important;               /* Mengatur jarak antar baris agar rapi */
+        word-break: break-word !important;         /* Memotong kata panjang agar pindah baris */
+        line-height: 1.3 !important;               /* Mengatur kerapian jarak antar baris */
+        overflow-wrap: break-word !important;
+    }
+    
+    /* Tambahan untuk memastikan pembungkus terluar tidak memotong text */
+    [data-testid="stMetricValue"] {
+        white-space: normal !important;
     }
     </style>
     """,
