@@ -181,7 +181,7 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
             texttemplate='%{text:.1f}',
             textposition='outside'
         ))
-        fig.update_layout(xaxis_title=label_x, yaxis_title="Provinsi")
+        fig.update_layout(xaxis_title=label_x)
     else:
         # Fallback ke standar Plotly Express jika tidak ada daerah yang cocok
         fig = px.bar(df_sorted, x=kolom_nilai, y="label_provinsi", orientation='h', 
