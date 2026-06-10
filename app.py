@@ -509,10 +509,10 @@ with col_eksos4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(
 
 # Baris 2: Khusus untuk indikator sosial (4 Kolom agar ruangnya luas dan teks tetap besar)
 col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
-with col_sos: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
-with col_sos: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
-with col_sos: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
-with col_sos: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
+with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
+with col_sos2: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
+with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
+with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 # Pembatas baris agar tidak menempel kaku
 st.markdown("<br>", unsafe_allow_html=True)
