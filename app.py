@@ -500,35 +500,37 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-# KUNCI PERBAIKAN: CSS yang lebih spesifik untuk menembus proteksi komponen Streamlit
-st.markdown(
-    """
-    <style>
-    /* Menargetkan pembungkus utama teks metrik */
-    [data-testid="stMetricValue"] > div {
-        font-size: 16px !important;                /* Memaksa ukuran tulisan menjadi kecil (16px) */
-        white-space: normal !important;            /* Memperbolehkan teks turun ke bawah */
-        word-break: break-word !important;         /* Memotong kata panjang agar pindah baris */
-        line-height: 1.3 !important;               /* Mengatur kerapian jarak antar baris */
-        overflow-wrap: break-word !important;
-    }
-    
-    /* Tambahan untuk memastikan pembungkus terluar tidak memotong text */
-    [data-testid="stMetricValue"] {
-        white-space: normal !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-col_ek1, col_ek2, col_ek3, col_ek4, col_ek5, col_ek6 = st.columns(6)
+# Baris 1: Khusus untuk indikator makro utama (4 Kolom agar ruangnya luas dan teks tetap besar)
+col_ek1, col_ek2, col_ek3, col_ek4 = st.columns(4)
 with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
 with col_ek3: st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
 with col_ek4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
-with col_ek5: st.metric(label="Ekspor Terbesar", value=format_val(df_active_dict.get('ekspor_top3')))
-with col_ek6: st.metric(label="Tenaga Kerja Terbesar", value=format_val(df_active_dict.get('naker_top')))
+
+# Pembatas baris agar tidak menempel kaku
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Baris 2: Khusus untuk Ekspor dan Tenaga Kerja (Dibagi 2 kolom lebar agar teks panjang aman mengalir ke bawah)
+col_bawah1, col_bawah2 = st.columns(2)
+with col_bawah1:
+    nilai_ekspor = format_val(df_active_dict.get('ekspor_top3'))
+    st.markdown(
+        f'<div style="line-height: 1.3;">'
+        f'<p style="margin:0; font-size:14px; color:#A3AED0; font-weight:500;">Ekspor Terbesar</p>'
+        f'<h3 style="margin:0; font-size:20px; font-weight:600; color:#F4F6FA; white-space: normal; word-wrap: break-word;">{nilai_ekspor}</h3>'
+        f'</div>', 
+        unsafe_allow_html=True
+    )
+
+with col_bawah2:
+    nilai_naker = format_val(df_active_dict.get('naker_top'))
+    st.markdown(
+        f'<div style="line-height: 1.3;">'
+        f'<p style="margin:0; font-size:14px; color:#A3AED0; font-weight:500;">Tenaga Kerja Terbesar</p>'
+        f'<h3 style="margin:0; font-size:20px; font-weight:600; color:#F4F6FA; white-space: normal; word-wrap: break-word;">{nilai_naker}</h3>'
+        f'</div>', 
+        unsafe_allow_html=True
+    )
 
 col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
 with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
