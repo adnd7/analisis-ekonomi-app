@@ -523,8 +523,8 @@ with col_bawah1:
     nilai_ekspor = format_val(df_active_dict.get('ekspor_top3'))
     st.markdown(
         f'<div style="line-height: 1.3;">'
-        f'<p style="margin:0; font-size:14px; color: var(--text-color, #A3AED0); font-weight:500; opacity: 0.8;">Ekspor Terbesar</p>'
-        f'<h3 style="margin:0; font-size:24px; font-weight:600; color: var(--text-color, inherit); white-space: normal; word-wrap: break-word;">{nilai_ekspor}</h3>'
+        f'<p style="margin:0; font-size:14px; font-weight:500; opacity: 0.8;">Ekspor Terbesar</p>'
+        f'<h3 style="margin:0; font-size:16px; font-weight:600; color: var(--text-color, inherit); white-space: normal; word-wrap: break-word;">{nilai_ekspor}</h3>'
         f'</div>', 
         unsafe_allow_html=True
     )
@@ -533,8 +533,8 @@ with col_bawah2:
     nilai_naker = format_val(df_active_dict.get('naker_top'))
     st.markdown(
         f'<div style="line-height: 1.3;">'
-        f'<p style="margin:0; font-size:14px; color: var(--text-color, #A3AED0); font-weight:500; opacity: 0.8;">Tenaga Kerja Terbesar</p>'
-        f'<h3 style="margin:0; font-size:24px; font-weight:600; color: var(--text-color, inherit); white-space: normal; word-wrap: break-word;">{nilai_naker}</h3>'
+        f'<p style="margin:0; font-size:14px; font-weight:500; opacity: 0.8;">Tenaga Kerja Terbesar</p>'
+        f'<h3 style="margin:0; font-size:16px; font-weight:600; color: var(--text-color, inherit); white-space: normal; word-wrap: break-word;">{nilai_naker}</h3>'
         f'</div>', 
         unsafe_allow_html=True
     )
