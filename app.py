@@ -197,7 +197,7 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-def buat_peta_klasifikasi(df_aktif, provinsi_aktif=None):
+def buat_peta_klasifikasi(df_aktif):
     if df_aktif is None or df_aktif.empty or "klasifikasi" not in df_aktif.columns:
         st.warning("Data kosong atau kolom klasifikasi tidak ditemukan, peta tidak dapat dimuat.")
         return
@@ -210,14 +210,15 @@ def buat_peta_klasifikasi(df_aktif, provinsi_aktif=None):
         with open(geojson_path, "r") as f:
             geojson_indonesia = json.load(f)
             
+        # SINKRONISASI PETA: Membuat salinan data khusus untuk peta agar data asli Excel tidak rusak
         df_peta = df_aktif.copy()
         
+        # Mengubah nama "DI Yogyakarta" menjadi "Daerah Istimewa Yogyakarta" agar dibaca oleh GeoJSON
         df_peta['provinsi'] = df_peta['provinsi'].replace({
             "DI Yogyakarta": "Daerah Istimewa Yogyakarta",
             "D.I. Yogyakarta": "Daerah Istimewa Yogyakarta"
         })
             
-        # Grafik Utama Peta (Choropleth)
         fig = px.choropleth_mapbox(
             df_peta, geojson=geojson_indonesia, locations="provinsi", featureidkey="properties.PROVINSI", color="klasifikasi",                  
             color_discrete_map={              
@@ -228,6 +229,10 @@ def buat_peta_klasifikasi(df_aktif, provinsi_aktif=None):
             },
             mapbox_style="carto-positron", center={"lat": -2.5, "lon": 118.0}, zoom=3.5, opacity=0.8, labels={"klasifikasi": "<b>Status Klasifikasi</b>"}
         )
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
+        st.plotly_chart(fig, use_container_width=True)
+    except Exception as e:
+        st.info(f"🗺️ *[Gagal memuat peta GeoJSON. Error: {e}]*")
 
         # ----------------------------------------------------------------------
         # LOGIKA MENAMBAHKAN ICON PIN DI PROVINSI TERPILIH
@@ -499,8 +504,7 @@ with col_Grafik2:
     buat_bar_chart_makro(df_all_prov, "Kontribusi PDRB", provinsi_terpilih)
 
 st.subheader(f"🗺️ Sebaran Klasifikasi Wilayah")
-# PERBAIKAN: Masukkan variabel provinsi_terpilih sebagai argumen kedua
-buat_peta_klasifikasi(df_all_prov, provinsi_terpilih) 
+buat_peta_klasifikasi(df_all_prov)
 st.markdown("***Catatan:*** *Klasifikasi menggunakan metode Tipologi Klassen dengan mempertimbangkan rata-rata pertumbuhan ekonomi dan PDRB per Kapita Tahun 2022-2025*")
 
 st.markdown("---")
