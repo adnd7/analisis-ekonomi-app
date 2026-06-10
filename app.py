@@ -165,7 +165,7 @@ def buat_bar_chart_makro(df_aktif, tipe_chart, provinsi_aktif=None):
                 colorbar=dict(
                     title=label_x,
                     thickness=15,
-                    len=0.6,
+                    len=0.4,
                     yanchor="middle",
                     y=0.5,
                     # KUNCI PERBAIKAN: Menghapus garis tepi luar dan garis penanda skala warna
