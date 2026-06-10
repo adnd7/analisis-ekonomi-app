@@ -501,11 +501,15 @@ buat_area_struktur(df_struktur_aktif)
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
 # Baris 1: Khusus untuk indikator makro utama (4 Kolom agar ruangnya luas dan teks tetap besar)
-col_ek1, col_ek2, col_ek3, col_ek4 = st.columns(4)
-with col_ek1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
-with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
-with col_ek3: st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
-with col_ek4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
+col_eksos1, col_eksos2, col_eksos3, col_eksos4, col_eksos5, col_eksos6, col_eksos7, col_eksos8 = st.columns(8)
+with col_eksos1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
+with col_eksos2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
+with col_eksos3: st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
+with col_eksos4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
+with col_eksos5: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
+with col_eksos6: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
+with col_eksos7: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
+with col_eksos8: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 # Pembatas baris agar tidak menempel kaku
 st.markdown("<br>", unsafe_allow_html=True)
@@ -531,12 +535,6 @@ with col_bawah2:
         f'</div>', 
         unsafe_allow_html=True
     )
-
-col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
-with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
-with col_sos2: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
-with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
-with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 st.markdown("---")
 st.header(f"3. ANALISIS SEKTOR UNGGULAN DAERAH {provinsi_terpilih.upper()}")
