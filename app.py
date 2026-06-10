@@ -438,6 +438,16 @@ def format_val(val, unit=""):
     except ValueError:
         return f"{val}{unit}"
 
+def format_gini(val):
+    if pd.isna(val) or val == "" or str(val).lower() == 'nan': 
+        return "-"
+    try:
+        val_float = float(val)
+        # Memaksa format 3 angka di belakang koma
+        return f"{val_float:.3f}"
+    except ValueError:
+        return f"{val}"
+
 st.header("1. KONDISI EKONOMI MAKRO DAERAH 38 PROVINSI")
 col_Grafik1, col_Grafik2 = st.columns(2)
 with col_Grafik1:
@@ -512,8 +522,7 @@ col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
 with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
 with col_sos2: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
 with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
-with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
-
+with col_sos4: st.metric(label="Rasio Gini", value=format_gini(df_active_dict.get('gini')))
 # Pembatas baris agar tidak menempel
 st.markdown("<br>", unsafe_allow_html=True)
 
