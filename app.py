@@ -500,16 +500,19 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-# Baris 1: Khusus untuk indikator makro utama (4 Kolom agar ruangnya luas dan teks tetap besar)
-col_eksos1, col_eksos2, col_eksos3, col_eksos4, col_eksos5, col_eksos6, col_eksos7, col_eksos8 = st.columns(8)
+# Baris 1: Khusus untuk indikator ekonomi makro utama (4 Kolom agar ruangnya luas dan teks tetap besar)
+col_ek1, col_ek2, col_ek3, col_ek4 = st.columns(4)
 with col_eksos1: st.metric(label="PDRB Perkapita (Juta Rp)", value=format_val(df_active_dict.get('pdrb_perkapita')))
 with col_eksos2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
 with col_eksos3: st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
 with col_eksos4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
-with col_eksos5: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
-with col_eksos6: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
-with col_eksos7: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
-with col_eksos8: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
+
+# Baris 2: Khusus untuk indikator sosial (4 Kolom agar ruangnya luas dan teks tetap besar)
+col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
+with col_sos: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
+with col_sos: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
+with col_sos: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
+with col_sos: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
 # Pembatas baris agar tidak menempel kaku
 st.markdown("<br>", unsafe_allow_html=True)
@@ -521,7 +524,7 @@ with col_bawah1:
     st.markdown(
         f'<div style="line-height: 1.3;">'
         f'<p style="margin:0; font-size:14px; color:#A3AED0; font-weight:500;">Ekspor Terbesar</p>'
-        f'<h3 style="margin:0; font-size:20px; font-weight:600; color:#F4F6FA; white-space: normal; word-wrap: break-word;">{nilai_ekspor}</h3>'
+        f'<h3 style="margin:0; font-size:16px; font-weight:600; color:#9DBEBB; white-space: normal; word-wrap: break-word;">{nilai_ekspor}</h3>'
         f'</div>', 
         unsafe_allow_html=True
     )
