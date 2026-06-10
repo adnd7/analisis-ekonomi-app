@@ -500,145 +500,45 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-# KUNCI DESAIN: Hanya menyisakan efek kotak putih dengan glass shadow halus
-st.markdown(
-    """
-    <style>
-    .kpi-card {
-        background-color: #FFFFFF;
-        border-radius: 12px;
-        padding: 20px;
-        /* Efek bayangan halus (glass shadow) */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
-        border: 1px solid #F1F5F9;
-        margin-bottom: 15px;
-    }
-    .kpi-label {
-        font-size: 14px;
-        color: #64748B;
-        margin-bottom: 6px;
-        font-weight: normal; /* Mengembalikan tulisan agar tidak bold kapital semua */
-    }
-    .kpi-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: #0F172A;
-        line-height: 1.1;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Pembacaan Nilai Utama
-val_pdrb = format_val(df_active_dict.get('pdrb_perkapita'))
-val_inflasi = format_val(df_active_dict.get('inflasi'))
-val_pma = format_val(df_active_dict.get('pma'))
-val_pmdn = format_val(df_active_dict.get('pmdn'))
-val_ipm = format_val(df_active_dict.get('ipm'))
-val_kemiskinan = format_val(df_active_dict.get('kemiskinan'))
-val_tpt = format_val(df_active_dict.get('tpt'))
-val_gini = format_val(df_active_dict.get('gini'))
-
-# ------------------------------------------------------------------------------
-# BARIS 1: INDIKATOR MAKRO UTAMA
-# ------------------------------------------------------------------------------
+# Baris 1: Khusus untuk indikator ekonomi makro utama (4 Kolom agar ruangnya luas dan teks tetap besar)
 col_ek1, col_ek2, col_ek3, col_ek4 = st.columns(4)
+with col_ek1: st.metric(label="PDRB Perkapita (Juta Rupiah)", value=format_val(df_active_dict.get('pdrb_perkapita')))
+with col_ek2: st.metric(label="Inflasi Tahunan (%)", value=format_val(df_active_dict.get('inflasi')))
+with col_ek3: st.metric(label="Nilai PMA (Juta USD)", value=format_val(df_active_dict.get('pma')))
+with col_ek4: st.metric(label="Nilai PMDN (Miliar Rupiah)", value=format_val(df_active_dict.get('pmdn')))
 
-with col_ek1:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">PDRB Perkapita (Juta Rupiah)</div>
-        <div class="kpi-value">{val_pdrb}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_ek2:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Inflasi Tahunan (%)</div>
-        <div class="kpi-value">{val_inflasi}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_ek3:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Nilai PMA (Juta USD)</div>
-        <div class="kpi-value">{val_pma}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_ek4:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Nilai PMDN (Miliar Rupiah)</div>
-        <div class="kpi-value">{val_pmdn}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ------------------------------------------------------------------------------
-# BARIS 2: INDIKATOR SOSIAL
-# ------------------------------------------------------------------------------
+# Baris 2: Khusus untuk indikator sosial (4 Kolom agar ruangnya luas dan teks tetap besar)
 col_sos1, col_sos2, col_sos3, col_sos4 = st.columns(4)
+with col_sos1: st.metric(label="IPM", value=format_val(df_active_dict.get('ipm')))
+with col_sos2: st.metric(label="Kemiskinan (%)", value=format_val(df_active_dict.get('kemiskinan')))
+with col_sos3: st.metric(label="TPT (%)", value=format_val(df_active_dict.get('tpt')))
+with col_sos4: st.metric(label="Rasio Gini", value=format_val(df_active_dict.get('gini')))
 
-with col_sos1:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">IPM</div>
-        <div class="kpi-value">{val_ipm}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_sos2:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Kemiskinan (%)</div>
-        <div class="kpi-value">{val_kemiskinan}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_sos3:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">TPT (%)</div>
-        <div class="kpi-value">{val_tpt}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col_sos4:
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Rasio Gini</div>
-        <div class="kpi-value">{val_gini}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Pembatas baris ke komponen bawah
+# Pembatas baris agar tidak menempel
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ------------------------------------------------------------------------------
-# BARIS 3: SEKTORAL KUSTOM (EKSPOR & TENAGA KERJA)
-# ------------------------------------------------------------------------------
+# Baris 2: Khusus untuk Ekspor dan Tenaga Kerja (Dibagi 2 kolom lebar agar teks panjang aman mengalir ke bawah)
 col_bawah1, col_bawah2 = st.columns(2)
 with col_bawah1:
     nilai_ekspor = format_val(df_active_dict.get('ekspor_top3'))
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Ekspor Terbesar</div>
-        <div class="kpi-value" style="font-size: 18px; white-space: normal; word-wrap: break-word;">{nilai_ekspor}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="line-height: 1.3;">'
+        f'<p style="margin:0; font-size:14px; font-weight:500; opacity: 0.8;">Ekspor Terbesar</p>'
+        f'<h3 style="margin:0; font-size:16px; font-weight:600; color: var(--text-color, inherit); white-space: normal; word-wrap: break-word;">{nilai_ekspor}</h3>'
+        f'</div>', 
+        unsafe_allow_html=True
+    )
 
 with col_bawah2:
     nilai_naker = format_val(df_active_dict.get('naker_top'))
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div class="kpi-label">Tenaga Kerja Terbesar</div>
-        <div class="kpi-value" style="font-size: 18px; white-space: normal; word-wrap: break-word;">{nilai_naker}</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    st.markdown(
+        f'<div style="line-height: 1.3;">'
+        f'<p style="margin:0; font-size:14px; font-weight:500; opacity: 0.8;">Tenaga Kerja Terbesar</p>'
+        f'<h3 style="margin:0; font-size:16px; font-weight:600; color: var(--text-color, inherit); white-space: normal; word-wrap: break-word;">{nilai_naker}</h3>'
+        f'</div>', 
+        unsafe_allow_html=True
+    )
+
 st.markdown("---")
 
 st.header(f"3. ANALISIS SEKTOR UNGGULAN DAERAH {provinsi_terpilih.upper()}")
