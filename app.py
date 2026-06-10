@@ -500,7 +500,7 @@ buat_area_struktur(df_struktur_aktif)
 
 st.markdown("#### Indikator Ekonomi dan Sosial Lainnya")
 
-# KUNCI DESAIN: Custom CSS untuk mendesain kotak putih (Card) dan badge DTD/YTD
+# KUNCI DESAIN: Hanya menyisakan efek kotak putih dengan glass shadow halus
 st.markdown(
     """
     <style>
@@ -508,57 +508,29 @@ st.markdown(
         background-color: #FFFFFF;
         border-radius: 12px;
         padding: 20px;
+        /* Efek bayangan halus (glass shadow) */
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
         border: 1px solid #F1F5F9;
         margin-bottom: 15px;
     }
     .kpi-label {
-        font-size: 12px;
-        text-transform: uppercase;
+        font-size: 14px;
         color: #64748B;
-        font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        font-weight: normal; /* Mengembalikan tulisan agar tidak bold kapital semua */
     }
     .kpi-value {
         font-size: 28px;
         font-weight: 700;
         color: #0F172A;
-        margin-bottom: 12px;
         line-height: 1.1;
-    }
-    .kpi-subtext {
-        font-size: 11px;
-        color: #94A3B8;
-        font-style: italic;
-        margin-bottom: 10px;
-    }
-    .badge-container {
-        display: flex;
-        gap: 6px;
-    }
-    .badge-positive {
-        background-color: #DCFCE7;
-        color: #15803D;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-    .badge-negative {
-        background-color: #FFE4E6;
-        color: #B91C1C;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 700;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Pembacaan Nilai Utama & Variabel Pendukung
-# Catatan: Karena data DTD/YTD tidak ada di dict utama, kita buat simulasi badge kondisional berbasis nilai data makro
+# Pembacaan Nilai Utama
 val_pdrb = format_val(df_active_dict.get('pdrb_perkapita'))
 val_inflasi = format_val(df_active_dict.get('inflasi'))
 val_pma = format_val(df_active_dict.get('pma'))
@@ -578,10 +550,6 @@ with col_ek1:
     <div class="kpi-card">
         <div class="kpi-label">PDRB Perkapita (Juta Rupiah)</div>
         <div class="kpi-value">{val_pdrb}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-positive">YTD: +📈</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -590,10 +558,6 @@ with col_ek2:
     <div class="kpi-card">
         <div class="kpi-label">Inflasi Tahunan (%)</div>
         <div class="kpi-value">{val_inflasi}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-negative">DTD: -📉</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -602,10 +566,6 @@ with col_ek3:
     <div class="kpi-card">
         <div class="kpi-label">Nilai PMA (Juta USD)</div>
         <div class="kpi-value">{val_pma}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-positive">YTD: +📈</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -614,10 +574,6 @@ with col_ek4:
     <div class="kpi-card">
         <div class="kpi-label">Nilai PMDN (Miliar Rupiah)</div>
         <div class="kpi-value">{val_pmdn}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-positive">YTD: +📈</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -631,10 +587,6 @@ with col_sos1:
     <div class="kpi-card">
         <div class="kpi-label">IPM</div>
         <div class="kpi-value">{val_ipm}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-positive">YTD: +📈</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -643,10 +595,6 @@ with col_sos2:
     <div class="kpi-card">
         <div class="kpi-label">Kemiskinan (%)</div>
         <div class="kpi-value">{val_kemiskinan}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-negative">YTD: -📉</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -655,10 +603,6 @@ with col_sos3:
     <div class="kpi-card">
         <div class="kpi-label">TPT (%)</div>
         <div class="kpi-value">{val_tpt}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-negative">DTD: -📉</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -667,10 +611,6 @@ with col_sos4:
     <div class="kpi-card">
         <div class="kpi-label">Rasio Gini</div>
         <div class="kpi-value">{val_gini}</div>
-        <div class="kpi-subtext">Data Spot: {tahun_terpilih}</div>
-        <div class="badge-container">
-            <div class="badge-negative">DTD: -📉</div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -687,7 +627,6 @@ with col_bawah1:
     <div class="kpi-card">
         <div class="kpi-label">Ekspor Terbesar</div>
         <div class="kpi-value" style="font-size: 18px; white-space: normal; word-wrap: break-word;">{nilai_ekspor}</div>
-        <div class="kpi-subtext">Komoditas Utama Sektoral</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -697,7 +636,6 @@ with col_bawah2:
     <div class="kpi-card">
         <div class="kpi-label">Tenaga Kerja Terbesar</div>
         <div class="kpi-value" style="font-size: 18px; white-space: normal; word-wrap: break-word;">{nilai_naker}</div>
-        <div class="kpi-subtext">Sektor Penyerap Utama</div>
     </div>
     """, unsafe_allow_html=True)
     
